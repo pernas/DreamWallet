@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import { DEFAULT_ACCOUNT_SET } from '../actions'
-import Wallet from '../wallet'
+import { Wallet } from '../immutable'
 
 const INITIAL_STATE = new Wallet()
 
