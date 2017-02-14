@@ -57,7 +57,7 @@
     "redux-thunk": "^2.2.0",
     "reselect": "^2.5.4",
     "reselect-map": "^1.0.0",
-    "wallet": "file:../wallet",
+    "dream-wallet": "file:../wallet",
     "whatwg-fetch": "^1.0.0"
   }
 }

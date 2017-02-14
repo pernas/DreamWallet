@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import transactions from './transactions'
 import status from './status'
-import * as Wallet from 'wallet'
+import * as Wallet from 'dream-wallet'
 
 const reducers = combineReducers({
   transactions,

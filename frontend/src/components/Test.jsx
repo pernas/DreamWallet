@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import RaisedButton from 'material-ui/RaisedButton';
-import {walletActions} from 'wallet'
+import { walletActions } from 'dream-wallet'
 import * as Actions from '../actions'
 
 const Test = (props) => {

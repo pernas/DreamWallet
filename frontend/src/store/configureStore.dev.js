@@ -1,7 +1,7 @@
 import createLogger from 'redux-logger'
 import { createStore, applyMiddleware } from 'redux'
 import reducers from '../reducers'
-import * as Wallet from 'wallet'
+import * as Wallet from 'dream-wallet'
 
 // Tip: replace the thunk and promise middleware with the redux-saga middleware
 
