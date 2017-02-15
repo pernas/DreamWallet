@@ -1,11 +1,34 @@
 
-import WebSocket from 'ws'
-import { compose, add } from 'ramda'
+const WebSocket = global.WebSocket || global.MozWebSocket
+import { compose, concat } from 'ramda'
+
+function WS (uri, protocols, opts) {
+  return protocols ? new WebSocket(uri, protocols) : new WebSocket(uri)
+}
+
+if (WebSocket) {
+  WS.prototype = WebSocket.prototype
+
+  WS.prototype.on = function (event, callback) {
+    this['on' + event] = callback
+  }
+
+  WS.prototype.once = function (event, callback) {
+    this['on' + event] = function () {
+      callback.apply(callback, arguments)
+      this['on' + event] = null
+    }.bind(this)
+  }
+
+  WS.prototype.off = function (event) {
+    this['on' + event] = null
+  }
+}
 
 let toArrayFormat = (a) => Array.isArray(a) ? a : [a]
 
 class Socket {
-  constructor (options) {
+  constructor (options = {}) {
     let {
       wsUrl = 'wss://ws.blockchain.info/inv'
     } = options
@@ -31,7 +54,7 @@ class Socket {
     if (!this.socket || this.socket.readyState === 3) {
       try {
         this.pingIntervalPID = setInterval(this.ping.bind(this), this.pingInterval)
-        this.socket = new WebSocket(this.wsUrl, [], { headers: this.headers })
+        this.socket = new WS(this.wsUrl, [], { headers: this.headers })
         this.socket.on('open', onOpen)
         this.socket.on('message', onMessage)
         this.socket.on('close', onClose)
@@ -73,13 +96,13 @@ class Socket {
   static addrSubMessage (addresses) {
     if (addresses == null) return ''
     let toMsg = (addr) => JSON.stringify({ op: 'addr_sub', addr })
-    return toArrayFormat(addresses).map(toMsg).reduce(add, '')
+    return toArrayFormat(addresses).map(toMsg).reduce(concat, '')
   }
 
   static xPubSubMessage (xpubs) {
     if (xpubs == null) return ''
     let toMsg = (xpub) => JSON.stringify({ op: 'xpub_sub', xpub })
-    return toArrayFormat(xpubs).map(toMsg).reduce(add, '')
+    return toArrayFormat(xpubs).map(toMsg).reduce(concat, '')
   }
 
   static pingMessage () {

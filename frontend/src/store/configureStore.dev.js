@@ -1,16 +1,19 @@
 import createLogger from 'redux-logger'
 import { createStore, applyMiddleware } from 'redux'
 import reducers from '../reducers'
-import * as Wallet from 'dream-wallet'
+
+import { Socket } from 'dream-wallet/lib/network'
+import { walletSyncMiddleware, walletSocketMiddleware } from 'dream-wallet/lib/middleware'
 
 // Tip: replace the thunk and promise middleware with the redux-saga middleware
 
 const configureStore = () => {
-  const walletSyncMiddleware = Wallet.walletSyncMiddleware({ path: 'wallet' })
+  const socket = new Socket()
   const store = createStore(
     reducers,
     applyMiddleware(
-      walletSyncMiddleware,
+      walletSyncMiddleware({ path: 'wallet' }),
+      walletSocketMiddleware({ socket }),
       createLogger()
     )
   )
