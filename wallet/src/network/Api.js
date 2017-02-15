@@ -1,6 +1,7 @@
-const Async = require('control.async')(Task)
 import 'isomorphic-fetch'
-import Task from 'data.task'
+import Promise from 'es6-promise'
+Promise.polyfill()
+
 
 export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
 export const BLOCKCHAIN_INFO = 'https://blockchain.info/'
@@ -21,12 +22,8 @@ class Api {
   /* Permitted extra headers:
      sessionToken -> "Authorization Bearer <token>" */
   request (action, method, data, extraHeaders) {
-    data = data || {}
-    if (this.apiCode != null) data.api_code = this.apiCode
 
-    var url = this.rootUrl + method
-    var body = data ? Api.encodeFormData(data) : ''
-
+    // options
     var options = {
       method: action,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -39,47 +36,58 @@ class Api {
       }
     }
 
-    if (action === 'GET') url += '?' + body
-    if (action === 'POST') options.body = body
+    // body
+    const apicode = { api_code: this.apiCode }
+    const body = this.apiCode ? {...data, ...apicode} : {...data}
 
-    return Async.fromPromise(fetch(url, options))
-                             .chain(Api.checkStatus)
-                             .chain(Api.extractData)
-                            //  .chain(handleNTPResponse(time))
+    switch (action) {
+      case 'GET':
+        const urlGET = this.rootUrl + method + '?' + Api.encodeFormData(body)
+        return fetch(urlGET, options).then(Api.checkStatus).then(Api.extractData)
+      case 'POST':
+        const urlPOST = this.rootUrl + method
+        options.body = body
+        return fetch(urlPOST, options).then(Api.checkStatus).then(Api.extractData)
+      default:
+        return Promise.reject({error: 'HTTP_ACTION_NOT_SUPPORTED'})
+    }
   }
 
-  // fetchWalletTask :: () -> Task Error JSON
-  fetchWallet (guid, sharedKey) {
+  // fetchWalletWithSharedKey :: () -> Promise JSON
+  fetchWalletWithSharedKey (guid, sharedKey) {
     var data = { guid, sharedKey, method: 'wallet.aes.json', format: 'json' }
     return this.request('POST', 'wallet', data)
   }
 
-  // checkStatus :: Response -> Task Error Response
+  // checkStatus :: Response -> Promise Response
   static checkStatus (r) {
-    return r.ok
-      ? Task.of(r)
-      : Task.rejected({ initial_error: 'http network error, status ' + r.status })
-    // r.ok ? Task.of(r) : Task.rejected(r)
+    return r.ok ? Promise.resolve(r) : Promise.reject(r)
   }
 
-  // extractData :: Response -> Task Error (JSON | BLOB | TEXT)
+  // extractData :: Response -> Promise (JSON | BLOB | TEXT)
   static extractData (r) {
-    const responseOfType = (t) => r.headers.get('content-type') && r.headers.get('content-type').indexOf(t) > -1
+
+    const responseOfType = (t) =>
+      r.headers.get('content-type') &&
+      r.headers.get('content-type').indexOf(t) > -1
+
     switch (true) {
       case responseOfType('application/json'):
-        return Async.fromPromise(r.json())
+        return r.json()
       case responseOfType('image/jpeg'):
-        return Async.fromPromise(r.blob())
+        return r.blob()
       default:
-        return Async.fromPromise(r.text())
+        return r.text()
     }
   }
 
   // encodeFormData :: Object -> String
   static encodeFormData (data) {
-    return Object.keys(data)
-      .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
-      .join('&')
+    return data
+      ? Object.keys(data)
+        .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
+        .join('&')
+      : ''
   }
 }
 
