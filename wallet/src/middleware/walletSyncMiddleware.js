@@ -1,4 +1,5 @@
-export const walletSyncMiddleware = (options) => (store) => (next) => (action) => {
+
+const walletSyncMiddleware = (options) => (store) => (next) => (action) => {
   let prevWallet = store.getState()[options.path]
   let result = next(action)
   let nextWallet = store.getState()[options.path]
@@ -9,3 +10,5 @@ export const walletSyncMiddleware = (options) => (store) => (next) => (action) =
   }
   return result
 }
+
+export default walletSyncMiddleware
