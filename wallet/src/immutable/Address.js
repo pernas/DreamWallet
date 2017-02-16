@@ -1,28 +1,16 @@
 
-import { Record } from 'immutable'
+import { Record } from 'immutable-ext'
 
-const AddressRecord = Record({
+const AddressType = Record({
   addr: null,
   priv: null,
-  tag: 0
+  tag: 0,
+  label: null,
+  created_time: null,
+  created_device_name: null,
+  created_device_version: null
 })
 
-class Address extends AddressRecord {
-  get active () {
-    return this.get('tag') === 0
-  }
-
-  get archived () {
-    return !this.active
-  }
-
-  setActive () {
-    return this.set('tag', 0)
-  }
-
-  setArchived () {
-    return this.set('tag', 2)
-  }
-}
+const Address = (obj) => new AddressType(obj)
 
 export default Address

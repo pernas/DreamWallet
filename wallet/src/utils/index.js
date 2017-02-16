@@ -1,7 +1,7 @@
 /* eslint-disable semi */
 import Either from 'data.either'
 import Task from 'data.task'
-import {lensProp, view, over, compose} from 'ramda'
+import { lensProp, view, over, compose } from 'ramda'
 import * as WCrypto from '../WalletCrypto'
 import Promise from 'es6-promise'
 Promise.polyfill()
