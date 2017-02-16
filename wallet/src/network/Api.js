@@ -1,26 +1,19 @@
 import 'isomorphic-fetch'
 import Promise from 'es6-promise'
+import { futurizeP } from 'futurize'
 Promise.polyfill()
 
 export const BLOCKCHAIN_INFO = 'https://blockchain.info/'
-export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
+export const API_BLOCKCHAIN_INFO = 'https://blockchain.info/'
 export const API_CODE = '1770d5d9-bcea-4d28-ad21-6cbd5be018a8'
+const id = x => x
 
-class Api {
-  constructor (options = {}) {
-    let {
-      rootUrl = BLOCKCHAIN_INFO,
-      apiUrl = API_BLOCKCHAIN_INFO,
-      apiCode = API_CODE
-    } = options
-    this.apiUrl = apiUrl
-    this.rootUrl = rootUrl
-    this.apiCode = apiCode
-  }
+const createApi = ({ rootUrl = BLOCKCHAIN_INFO
+                   , apiUrl = API_BLOCKCHAIN_INFO
+                   , apiCode = API_CODE } = {}, returnType) => {
 
-  /* Permitted extra headers:
-     sessionToken -> "Authorization Bearer <token>" */
-  request (action, method, data, extraHeaders) {
+  const future = returnType ? futurizeP(returnType) : id
+  const request = (action, method, data, extraHeaders) => {
     // options
     let options = {
       method: action,
@@ -33,37 +26,28 @@ class Api {
       }
     }
     // body
-    const apicode = { api_code: this.apiCode }
-    const body = Api.encodeFormData(this.apiCode ? {...data, ...apicode} : {...data})
-
+    const body = encodeFormData(apiCode ? {...data, ...{ api_code: apiCode }} : {...data})
     switch (action) {
       case 'GET':
-        const urlGET = this.rootUrl + method + '?' + body
-        return fetch(urlGET, options).then(Api.checkStatus).then(Api.extractData)
+        const urlGET = `${rootUrl}${method}?${body}`
+        return fetch(urlGET, options).then(checkStatus).then(extractData)
       case 'POST':
-        const urlPOST = this.rootUrl + method
+        const urlPOST = `${rootUrl}${method}`
         options.body = body
-        return fetch(urlPOST, options).then(Api.checkStatus).then(Api.extractData)
+        return fetch(urlPOST, options).then(checkStatus).then(extractData)
       default:
         return Promise.reject({error: 'HTTP_ACTION_NOT_SUPPORTED'})
     }
   }
 
-  // fetchWalletWithSharedKey :: () -> Promise JSON
-  fetchWalletWithSharedKey (guid, sharedKey) {
-    var data = { guid, sharedKey, method: 'wallet.aes.json', format: 'json' }
-    return this.request('POST', 'wallet', data)
-  }
-
   // checkStatus :: Response -> Promise Response
-  static checkStatus (r) {
+  const checkStatus = (r) => {
     return r.ok ? Promise.resolve(r)
                 : Promise.reject({ status: r.status, statusText: r.statusText})
   }
 
   // extractData :: Response -> Promise (JSON | BLOB | TEXT)
-  static extractData (r) {
-
+  const extractData = (r) => {
     const responseOfType = (t) =>
       r.headers.get('content-type') &&
       r.headers.get('content-type').indexOf(t) > -1
@@ -79,13 +63,24 @@ class Api {
   }
 
   // encodeFormData :: Object -> String
-  static encodeFormData (data) {
+  const encodeFormData = (data) => {
     return data
+
       ? Object.keys(data)
-        .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
+        .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(data[k])}`)
         .join('&')
       : ''
   }
+
+  // fetchWalletWithSharedKey :: () -> Promise JSON
+  const fetchWalletWithSharedKey = (guid, sharedKey) => {
+    var data = { guid, sharedKey, method: 'wallet.aes.json', format: 'json' }
+    return request('POST', 'wallet', data)
+  }
+
+  return {
+    fetchWalletWithSharedKey: future(fetchWalletWithSharedKey)
+  }
 }
 
-export default Api
+export default createApi

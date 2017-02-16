@@ -6,25 +6,20 @@ import { curry } from 'ramda'
 import { Left, Right } from 'data.either'
 import { fromJS } from 'immutable'
 
-// this is shit: wrong parse should not mean wrong password
-export const parseJSON = (json) => {
+export const parseDecrypted = (json) => {
   try {
-    return Right(JSON.parse(json));
-  } catch (e) {
-    return Left("Wrong password");
+    return Right(JSON.parse(json))
+  }
+  catch (e) {
+    return Left("Wrong password") 
   }
 }
 
-
 export const sha256 = (data) => crypto.createHash('sha256').update(data).digest();
 
-
-// decryptWallet :: Password -> payload JSON -> Either Error ImmutableWallet
+// decryptWallet :: Password -> payload JSON -> Either Error JSON
 export const decryptWallet = curry(
-  (password, data) => decryptWrapper(password, data)
-                        .chain(parseJSON)
-                        // .map(fromJS)
-)
+  (password, data) => decryptWrapper(password, data).chain(parseDecrypted))
 
 // decruptWrapper :: Password -> JSON -> Either Error String
 const decryptWrapper = curry(
