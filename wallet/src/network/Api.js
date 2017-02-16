@@ -2,9 +2,8 @@ import 'isomorphic-fetch'
 import Promise from 'es6-promise'
 Promise.polyfill()
 
-
-export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
 export const BLOCKCHAIN_INFO = 'https://blockchain.info/'
+export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
 export const API_CODE = '1770d5d9-bcea-4d28-ad21-6cbd5be018a8'
 
 class Api {
@@ -22,27 +21,24 @@ class Api {
   /* Permitted extra headers:
      sessionToken -> "Authorization Bearer <token>" */
   request (action, method, data, extraHeaders) {
-
     // options
-    var options = {
+    let options = {
       method: action,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       credentials: 'omit'
     }
-
     if (extraHeaders) {
       if (extraHeaders.sessionToken) {
         options.headers['Authorization'] = 'Bearer ' + extraHeaders.sessionToken
       }
     }
-
     // body
     const apicode = { api_code: this.apiCode }
-    const body = this.apiCode ? {...data, ...apicode} : {...data}
+    const body = Api.encodeFormData(this.apiCode ? {...data, ...apicode} : {...data})
 
     switch (action) {
       case 'GET':
-        const urlGET = this.rootUrl + method + '?' + Api.encodeFormData(body)
+        const urlGET = this.rootUrl + method + '?' + body
         return fetch(urlGET, options).then(Api.checkStatus).then(Api.extractData)
       case 'POST':
         const urlPOST = this.rootUrl + method
@@ -61,7 +57,8 @@ class Api {
 
   // checkStatus :: Response -> Promise Response
   static checkStatus (r) {
-    return r.ok ? Promise.resolve(r) : Promise.reject(r)
+    return r.ok ? Promise.resolve(r)
+                : Promise.reject({ status: r.status, statusText: r.statusText})
   }
 
   // extractData :: Response -> Promise (JSON | BLOB | TEXT)

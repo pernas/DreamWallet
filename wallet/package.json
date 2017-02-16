@@ -42,6 +42,7 @@
     "data.maybe": "^1.2.2",
     "immutable": "^3.8.1",
     "isomorphic-fetch": "^2.2.1",
+    "pretty-immutable": "^1.0.1",
     "ramda": "^0.23.0",
     "ramda-lens": "^0.1.1",
     "redux": "^3.6.0",
