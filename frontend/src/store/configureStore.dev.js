@@ -8,12 +8,12 @@ import { walletSyncMiddleware, walletSocketMiddleware } from 'dream-wallet/lib/m
 // Tip: replace the thunk and promise middleware with the redux-saga middleware
 
 const configureStore = () => {
-  const socket = new Socket()
+  // const socket = new Socket()
   const store = createStore(
     reducers,
     applyMiddleware(
-      walletSyncMiddleware({ path: 'wallet' }),
-      walletSocketMiddleware({ socket }),
+      // walletSyncMiddleware({ path: 'wallet' }),
+      // walletSocketMiddleware({ socket }),
       createLogger()
     )
   )

@@ -1,23 +1,36 @@
-import React from 'react'
-import Header from './Header'
-import Test from './Test'
-import TransactionListContainer from '../containers/TransactionListContainer'
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import Paper from 'material-ui/Paper'
+import ControlPanel from './ControlPanel'
 
-class Main extends React.Component {
-
-  constructor(props) {
-    super(props);
+const styles = {
+  wrapper: {
+    display: 'flex',
+    flex: 1,
+    padding: 32
+  },
+  json: {
+    flex: 1,
+    padding: 16,
+    overflow: 'scroll'
   }
+}
 
+class Main extends Component {
   render () {
     return (
-      <div id="page-wrap">
-        {/* <Header /> */}
-        {/* <TransactionListContainer /> */}
-        <Test/>
+      <div style={styles.wrapper}>
+        <Paper style={styles.json} zDepth={3}>
+          <pre>{JSON.stringify(this.props.wallet.toJS(), null, 2)}</pre>
+        </Paper>
+        <ControlPanel />
       </div>
     )
   }
 }
 
-export default Main
+let connectMain = connect(
+  (state) => ({ wallet: state.wallet })
+)
+
+export default connectMain(Main)

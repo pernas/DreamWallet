@@ -7,7 +7,6 @@ const reducers = combineReducers({
   transactions,
   status,
   wallet: Wallet.walletReducer
-
 })
 
 export default reducers
