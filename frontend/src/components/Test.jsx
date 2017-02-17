@@ -7,17 +7,17 @@ import * as Actions from '../actions'
 const Test = (props) => {
   const login = () => props.dispatch(Actions.login())
   const logout = () => props.dispatch(Actions.logout())
-  const randomize = () => props.dispatch(walletActions.setDefaultAccountIndex(Math.floor(Math.random() * 6) + 1))
+  // const randomize = () => props.dispatch(walletActions.setDefaultAccountIndex(Math.floor(Math.random() * 6) + 1))
   const addAddress = () => props.dispatch(walletActions.addAddress('1FqrtG9cDK1VVTE5DrpAZtdDZ4QhtZcdPv'))
 
   return (
     <div>
       <h1> My Test Component </h1>
       <div> {'Login status: ' + props.status.isLoggedIn} </div>
-      <div> Default Account:  { props.wallet } </div>
+      {/* <div> Default Account:  { props.wallet } </div> */}
       <RaisedButton primary label='LOGIN' onClick={login}/>
       <RaisedButton secondary label='LOGOUT' onClick={logout}/>
-      <RaisedButton primary label='Randomize Default' onClick={randomize}/>
+      {/* <RaisedButton primary label='Randomize Default' onClick={randomize}/> */}
       <RaisedButton secondary label='Add Address' onClick={addAddress}/>
     </div>
   )

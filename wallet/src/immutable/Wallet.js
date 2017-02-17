@@ -2,7 +2,9 @@ import { Record, List, Map } from 'immutable-ext'
 import Address from './Address'
 import Options from './Options'
 import HDWallet from './HDWallet'
-import { lensProp, over, compose, map } from 'ramda'
+import { compose, map } from 'ramda'
+import { over } from 'ramda-lens'
+import * as Lens from '../lens'
 
 const WalletType = Record({
   guid: '',
@@ -15,12 +17,9 @@ const WalletType = Record({
 })
 
 const WalletCons = (o) => new WalletType(o)
-const addressesLens = lensProp('keys');
-const optionsLens = lensProp('options');
-const hdwalletsLens = lensProp('hd_wallets');
-const addressesCons = over(addressesLens, map(Address))
-const optionsCons = over(optionsLens, Options)
-const hdwalletsCons = over(hdwalletsLens, map(HDWallet))
-const Wallet = compose(WalletCons, addressesCons, optionsCons, hdwalletsCons)
+const addresses = over(Lens.addresses, map(Address))
+const options = over(Lens.options, Options)
+const hdwallets = over(Lens.hdwallets, map(HDWallet))
+const Wallet = compose(hdwallets, addresses, options, WalletCons)
 
 export default Wallet
