@@ -11,6 +11,11 @@
   ],
   "author": "",
   "license": "MIT",
+  "standard": {
+    "global": [
+      "fetch"
+    ]
+  },
   "devDependencies": {
     "babel-cli": "^6.16.0",
     "babel-core": "^6.0.20",
