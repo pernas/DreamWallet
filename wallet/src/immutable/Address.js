@@ -1,14 +1,13 @@
-
 import { Record } from 'immutable-ext'
 
 const AddressType = Record({
-  addr: null,
-  priv: null,
+  addr: '',
+  priv: '',
   tag: 0,
-  label: null,
-  created_time: null,
-  created_device_name: null,
-  created_device_version: null
+  label: '',
+  created_time: 0,
+  created_device_name: '',
+  created_device_version: ''
 })
 
 const Address = (obj) => new AddressType(obj)
