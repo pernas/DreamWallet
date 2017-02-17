@@ -14,6 +14,9 @@ const styles = {
     marginLeft: 32
   },
   header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingBottom: 16,
     borderBottom: '1px solid #ddd'
   },
@@ -39,8 +42,11 @@ const PanelButton = ({ active, forPanel: p, onClick }) => (
 
 const PanelHeader = ({ active, onChangePanel }) => (
   <div style={styles.header}>
-    <PanelButton forPanel='login' active={active} onClick={onChangePanel} />
-    <PanelButton forPanel='test' active={active} onClick={onChangePanel} />
+    <div>
+      <PanelButton forPanel='login' active={active} onClick={onChangePanel} />
+      <PanelButton forPanel='test' active={active} onClick={onChangePanel} />
+    </div>
+    <img src='/public/img/blockchain.png' height={32} />
   </div>
 )
 
