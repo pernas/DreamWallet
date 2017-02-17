@@ -1,8 +1,15 @@
 // I might to differenciate between immutable and regular js lens
-import { lens } from 'ramda-lens'
+import { lens, compose, identity, reduceRight } from 'ramda'
 
-export const iLensProp = key =>
-  lens((x) => x.get(key), (val, x) => x.set(key, val))
+export const iLensProp = (key) => lens(
+  (x) => x.get(key),
+  (val, x) => x.set(key, val)
+)
+
+export const iLensPath = reduceRight(
+  (key, lens) => compose(iLensProp(key), lens),
+  identity
+)
 
 export const addresses = iLensProp('keys')
 export const options = iLensProp('options')
