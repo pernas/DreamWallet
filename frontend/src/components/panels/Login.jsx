@@ -27,19 +27,26 @@ class Login extends Component {
   }
 
   render () {
-    let { loadWallet } = this.props
+    let { loginState, loginStart, loginSuccess, loginError, loadWallet } = this.props
     let { guid, sharedKey, password } = this.state
 
-    let login = () => (
+    let login = () => {
+      loginStart()
       this.api.fetchWalletWithSharedKey(guid, sharedKey)
         .then(compose(JSON.parse, prop('payload')))
         .then(decryptWallet(password))
         .then(map(compose(loadWallet, Wallet)))
-    )
+        .then(e => e.map(loginSuccess).orElse(loginError))
+    }
 
     return (
       <div>
         <label>Login Form</label>
+        <ul>
+          <li>Pending: {String(loginState.pending)}</li>
+          <li>Success: {String(loginState.success)}</li>
+          <li>Error: {String(loginState.error)}</li>
+        </ul>
         <div>
           <TextField
             style={styles.input}

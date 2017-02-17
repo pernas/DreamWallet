@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import Paper from 'material-ui/Paper'
 import RaisedButton from 'material-ui/RaisedButton'
 import Login from './panels/Login'
+import * as actions from '../actions'
 import * as WalletActions from 'dream-wallet/lib/actions'
 
 const styles = {
@@ -23,7 +24,8 @@ const styles = {
   }
 }
 
-let connectPanel = connect(({ wallet }) => ({ wallet }), WalletActions)
+let combinedActions = Object.assign({}, WalletActions, actions)
+let connectPanel = connect((state) => state, combinedActions)
 
 const panels = ({
   'login': connectPanel(Login)
