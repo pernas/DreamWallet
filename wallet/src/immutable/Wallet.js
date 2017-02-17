@@ -1,24 +1,26 @@
-
-import { Record, List } from 'immutable'
+import { Record, List, Map } from 'immutable-ext'
 import Address from './Address'
+import Options from './Options'
+import HDWallet from './HDWallet'
+import { lensProp, over, compose, map } from 'ramda'
 
-// NOTE: come up with a better way of dealing with nested state,
-//  Juame suggested normalizr, maybe lenses could also work?
-
-const WalletRecord = Record({
-  defaultAccount: 0,
-  keys: List()
+const WalletType = Record({
+  guid: '',
+  sharedKey: '',
+  double_encryption: false,
+  address_book: List(),
+  keys: List(),
+  hd_wallets: List(),
+  options: Map()
 })
 
-class Wallet extends WalletRecord {
-  setDefaultAccountIndex (index) {
-    return this.set('defaultAccount', index)
-  }
-
-  pushAddress (addr) {
-    let a = new Address({ addr })
-    return this.set('keys', this.keys.push(a))
-  }
-}
+const WalletCons = (o) => new WalletType(o)
+const addressesLens = lensProp('keys');
+const optionsLens = lensProp('options');
+const hdwalletsLens = lensProp('hd_wallets');
+const addressesCons = over(addressesLens, map(Address))
+const optionsCons = over(optionsLens, Options)
+const hdwalletsCons = over(hdwalletsLens, map(HDWallet))
+const Wallet = compose(WalletCons, addressesCons, optionsCons, hdwalletsCons)
 
 export default Wallet
