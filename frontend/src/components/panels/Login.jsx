@@ -41,7 +41,7 @@ class Login extends Component {
 
     return (
       <div>
-        <label>Login Form</label>
+        <h2>Login Component</h2>
         <ul>
           <li>Pending: {String(loginState.pending)}</li>
           <li>Success: {String(loginState.success)}</li>
