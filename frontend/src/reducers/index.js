@@ -2,13 +2,13 @@ import { combineReducers } from 'redux'
 import login from './login'
 import transactions from './transactions'
 import status from './status'
-import * as Wallet from 'dream-wallet'
+import { walletReducer } from 'dream-wallet/lib/reducers'
 
 const reducers = combineReducers({
   loginState: login,
   transactions,
   status,
-  wallet: Wallet.walletReducer
+  wallet: walletReducer
 })
 
 export default reducers
