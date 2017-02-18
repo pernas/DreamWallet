@@ -16,7 +16,7 @@ export const walletReducer = (state = INITIAL_STATE, action) => {
       return Wallet()
     }
     case ADDRESS_ADD: {
-      const address = Address({ addr: action.payload })
+      const address = Address(action.payload)
       return over(Lens.addresses, as => as.set(address.get('addr'), address), state)
     }
     default:

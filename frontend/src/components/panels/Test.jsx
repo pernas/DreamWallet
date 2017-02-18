@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
+import bitcoin from 'bitcoinjs-lib'
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
@@ -11,7 +12,21 @@ const styles = {
   },
   row: {
     marginBottom: 16
+  },
+  rowButton: {
+    marginRight: 32
   }
+}
+
+const random = () => {
+  const keyPair = bitcoin.ECPair.makeRandom()
+  const addr = keyPair.getAddress()
+  const priv = keyPair.d.toHex()
+  const label = 'new address'
+  const created_time = Date.now()
+  const created_device_name = 'DREAM_WALLET'
+  const created_device_version = '0.0.0'
+  return {addr, priv, label, created_time, created_device_name, created_device_version}
 }
 
 class Test extends Component {
@@ -21,9 +36,9 @@ class Test extends Component {
   }
 
   render () {
-    let { addAddress, clearWallet } = this.props
-    let { addr } = this.state
-
+    const { addAddress, clearWallet } = this.props
+    const { addr } = this.state
+    const key = {addr}
     return (
       <div>
         <h2>Test Component</h2>
@@ -32,7 +47,8 @@ class Test extends Component {
           <RaisedButton secondary label='Add Address' onClick={() => addAddress(addr)} />
         </div>
         <div style={styles.row}>
-          <RaisedButton primary label='Empty Wallet' onClick={clearWallet} />
+          <RaisedButton style={styles.rowButton} primary label='Empty Wallet' onClick={clearWallet} />
+          <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random())} />
         </div>
       </div>
     )

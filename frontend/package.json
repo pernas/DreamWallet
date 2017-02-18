@@ -40,7 +40,9 @@
     "webpack-hot-middleware": "^2.13.0"
   },
   "dependencies": {
+    "bitcoinjs-lib": "^2.3.0",
     "blockchain.info": "^2.6.0",
+    "dream-wallet": "file:../wallet",
     "es6-promise": "^4.0.5",
     "isomorphic-fetch": "^2.2.1",
     "material-ui": "^0.16.7",
@@ -58,7 +60,6 @@
     "redux-thunk": "^2.2.0",
     "reselect": "^2.5.4",
     "reselect-map": "^1.0.0",
-    "dream-wallet": "file:../wallet",
     "whatwg-fetch": "^1.0.0"
   }
 }
