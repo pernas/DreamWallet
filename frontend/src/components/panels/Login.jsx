@@ -1,11 +1,7 @@
 import React, { Component } from 'react'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
-import { compose, map, prop } from 'ramda'
-
-import { Wallet } from 'dream-wallet/lib/immutable'
-import { createApi } from 'dream-wallet/lib/network'
-import { decryptWallet } from 'dream-wallet/lib/WalletCrypto'
+import { Network } from 'dream-wallet'
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
@@ -18,7 +14,6 @@ const styles = {
 class Login extends Component {
   constructor (props) {
     super(props)
-    this.api = createApi()
     this.state = {
       guid: 'f9df366a-3fc3-4826-827f-fb3c1e8ce616',
       sharedKey: '00efae13-985b-4858-81ad-71bd8b5ac863',
@@ -32,11 +27,10 @@ class Login extends Component {
 
     let login = () => {
       loginStart()
-      this.api.fetchWalletWithSharedKey(guid, sharedKey)
-        .then(compose(JSON.parse, prop('payload')))
-        .then(decryptWallet(password))
-        .then(map(compose(loadWallet, Wallet)))
-        .then(e => e.map(loginSuccess).orElse(loginError))
+      Network.wallet.get(guid, sharedKey, password)
+        .then(loadWallet)
+        .then(loginSuccess)
+        .catch(loginError)
     }
 
     return (
