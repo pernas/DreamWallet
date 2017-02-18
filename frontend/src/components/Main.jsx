@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import Paper from 'material-ui/Paper'
 import ControlPanel from './ControlPanel'
+import { Immutable } from 'dream-wallet'
+const toJS = Immutable.WalletUtils.toJS
 
 const styles = {
   wrapper: {
@@ -21,7 +23,7 @@ class Main extends Component {
     return (
       <div style={styles.wrapper}>
         <Paper style={styles.json} zDepth={3}>
-          <pre>{JSON.stringify(this.props.wallet.toJS(), null, 2)}</pre>
+          <pre>{JSON.stringify(toJS(this.props.wallet), null, 2)}</pre>
         </Paper>
         <ControlPanel />
       </div>
