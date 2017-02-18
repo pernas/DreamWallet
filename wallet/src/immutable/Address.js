@@ -2,7 +2,7 @@ import { Record } from 'immutable-ext'
 
 const AddressType = Record({
   addr: '',
-  priv: '',
+  priv: null,
   tag: 0,
   label: '',
   created_time: 0,

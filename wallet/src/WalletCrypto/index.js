@@ -11,7 +11,7 @@ export const parseDecrypted = (json) => {
     return Right(JSON.parse(json))
   }
   catch (e) {
-    return Left("Wrong password") 
+    return Left("Wrong password")
   }
 }
 
@@ -63,7 +63,7 @@ function stretchPassword (password, salt, iterations, keylen) {
 
 // decryptDataWithPassword :: data -> password -> iterations -> options -> Buffer
 function decryptDataWithPassword (data, password, iterations, options) {
-  assert(data, 'data missing');
+  if(!data) { return data }
   assert(password, 'password missing');
   assert(iterations, 'iterations missing');
 
@@ -93,7 +93,7 @@ function decryptBufferWithKey (payload, iv, key, options) {
 }
 
 function encryptDataWithPassword (data, password, iterations) {
-  assert(data, 'data missing');
+  if(!data) { return data }
   assert(password, 'password missing');
   assert(iterations, 'iterations missing');
 
@@ -120,5 +120,17 @@ function encryptDataWithKey (data, key, iv) {
 export const encryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
   encryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));
 
-export const decryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
-  decryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));
+export const decryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) => {
+  const decMsg = decryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations)
+  return decMsg === "" ? message : decMsg
+});
+
+// export const hashNTimes (data, iterations) {
+//   assert(iterations > 0, '`iterations` must be a number greater than 0');
+//   while (iterations--) data = sha256(data);
+//   return data.toString('hex');
+// }
+//
+// function sha256 (data) {
+//   return crypto.createHash('sha256').update(data).digest();
+// }

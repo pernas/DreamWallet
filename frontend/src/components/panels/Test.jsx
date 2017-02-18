@@ -7,14 +7,14 @@ let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
 const styles = {
   input: {
-    width: 360,
+    width: 260,
     marginRight: 32
   },
   row: {
     marginBottom: 16
   },
   rowButton: {
-    marginRight: 32
+    marginRight: 10
   }
 }
 
@@ -29,26 +29,37 @@ const random = () => {
   return {addr, priv, label, created_time, created_device_name, created_device_version}
 }
 
+const randomWatchOnly = () => {
+  const keyPair = bitcoin.ECPair.makeRandom()
+  const addr = keyPair.getAddress()
+  const label = 'new watch only'
+  const created_time = Date.now()
+  const created_device_name = 'DREAM_WALLET'
+  const created_device_version = '0.0.0'
+  return {addr, label, created_time, created_device_name, created_device_version}
+}
+
 class Test extends Component {
   constructor (props) {
     super(props)
-    this.state = { addr: '1FqrtG9cDK1VVTE5DrpAZtdDZ4QhtZcdPv' }
+    this.state = { password: 'my second password' }
   }
 
   render () {
-    const { addAddress, clearWallet } = this.props
-    const { addr } = this.state
-    const key = {addr}
+    const { addAddress, clearWallet, secondPasswordOn, secondPasswordOff } = this.props
+    const { password } = this.state
     return (
       <div>
         <h2>Test Component</h2>
         <div style={styles.row}>
-          <TextField style={styles.input} value={addr} onChange={link(this, 'addr')} placeholder='address' />
-          <RaisedButton secondary label='Add Address' onClick={() => addAddress(addr)} />
+          <TextField style={styles.input} value={password} onChange={link(this, 'password')} placeholder='password' />
+          <RaisedButton style={styles.rowButton} primary label='password on' onClick={() => secondPasswordOn(password)} />
+          <RaisedButton style={styles.rowButton} secondary label='password off' onClick={() => secondPasswordOff(password)} />
         </div>
         <div style={styles.row}>
-          <RaisedButton style={styles.rowButton} primary label='Empty Wallet' onClick={clearWallet} />
+          <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />
           <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random())} />
+          <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly())} />
         </div>
       </div>
     )
