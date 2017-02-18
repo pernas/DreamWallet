@@ -1,7 +1,6 @@
-import { Record, List, Map } from 'immutable-ext'
+import { Record, Map } from 'immutable-ext'
 import Cache from './Cache'
-import { compose, map } from 'ramda'
-import { over } from 'ramda-lens'
+import { compose, map, over } from 'ramda'
 import * as Lens from '../lens'
 
 const AccountType = Record({
@@ -9,12 +8,14 @@ const AccountType = Record({
   archived: false,
   xpriv: '',
   xpub: '',
-  address_labels: List(),
+  address_labels: Map(),
   cache: Map()
 })
 
 const AccountCons = (obj) => new AccountType(obj)
 const cache = over(Lens.cache, Cache)
-const Account = compose(cache, AccountCons)
+const addressLabelsMapCons = ls => Map(ls.map(l => [l.index, l.label]))
+const addressLabels = over(Lens.addressLabels, addressLabelsMapCons)
+const Account = compose(addressLabels, cache, AccountCons)
 
 export default Account

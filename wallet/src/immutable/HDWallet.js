@@ -1,7 +1,6 @@
 import { Record, List } from 'immutable-ext'
 import Account from './Account'
-import { compose, map } from 'ramda'
-import { over } from 'ramda-lens'
+import { compose, map, over } from 'ramda'
 import * as Lens from '../lens'
 
 const HDWalletType = Record({
@@ -13,7 +12,7 @@ const HDWalletType = Record({
 })
 
 const HDWalletsCons = (obj) => new HDWalletType(obj)
-const accounts = over(Lens.accounts, map(Account))
+const accounts = over(Lens.accounts, compose(map(Account), List))
 const HDWallet = compose(accounts, HDWalletsCons)
 
 export default HDWallet
