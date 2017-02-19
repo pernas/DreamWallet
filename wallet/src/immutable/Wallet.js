@@ -49,10 +49,10 @@ export const wIso = iso(toJS, fromJS)
 // /////////////////////////////////////////////////////////////////////////////
 // second password support
 // /////////////////////////////////////////////////////////////////////////////
+// check that example to understand traverse:
+// https://github.com/ramda/ramda-lens/commit/adb3ef830ef65d3b252e8c9b86b9659e9698cdba#diff-c1129c8b045390789fa8ff62f2c6b4a9R88
 // cipher :: (str => str) -> Wallet -> Either error Wallet
 export const cipher = curry((f, wallet) => {
-  // check that example to understand traverse:
-  // https://github.com/ramda/ramda-lens/commit/adb3ef830ef65d3b252e8c9b86b9659e9698cdba#diff-c1129c8b045390789fa8ff62f2c6b4a9R88
   const trAddr = traverseOf(compose(Lens.addresses, traversed, Lens.priv), Either.of, f)
   const traSeed = traverseOf(compose(Lens.hdwallets, traversed, Lens.seedHex), Either.of, f)
   const traXpriv = traverseOf(compose(Lens.hdwallets, traversed, Lens.accounts, traversed, Lens.xpriv ), Either.of, f)

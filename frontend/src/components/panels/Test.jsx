@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import bitcoin from 'bitcoinjs-lib'
+import Base58 from 'bs58'
 import { Immutable } from 'dream-wallet'
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
@@ -22,7 +23,7 @@ const styles = {
 const random = () => {
   const keyPair = bitcoin.ECPair.makeRandom()
   const addr = keyPair.getAddress()
-  const priv = keyPair.d.toHex()
+  const priv = Base58.encode(keyPair.d.toBuffer(32));
   const label = 'new address'
   const created_time = Date.now()
   const created_device_name = 'DREAM_WALLET'
@@ -82,8 +83,8 @@ class Test extends Component {
         </div>
         <div style={styles.row}>
           <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />
-          <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random())} />
-          <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly())} />
+          <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random(), password)} />
+          <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly(), password)} />
         </div>
       </div>
     )
