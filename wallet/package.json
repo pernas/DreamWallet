@@ -47,6 +47,7 @@
     "isomorphic-fetch": "^2.2.1",
     "pretty-immutable": "^1.0.1",
     "ramda": "^0.23.0",
+    "ramda-lens": "git@github.com:ramda/ramda-lens.git",
     "redux": "^3.6.0",
     "redux-actions": "^1.2.1",
     "redux-logger": "^2.8.1",

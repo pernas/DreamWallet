@@ -2,7 +2,7 @@ import * as crypto from 'crypto'
 import * as sjcl from 'sjcl'
 import assert from 'assert'
 import * as U from './utils'
-import { curry } from 'ramda'
+import { curry, compose, identity, repeat, reduceRight } from 'ramda'
 import { Left, Right } from 'data.either'
 import { fromJS } from 'immutable'
 
@@ -120,17 +120,11 @@ function encryptDataWithKey (data, key, iv) {
 export const encryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
   encryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));
 
-export const decryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) => {
-  const decMsg = decryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations)
-  return decMsg === "" ? message : decMsg
-});
+export const decryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
+  decryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));
 
-// export const hashNTimes (data, iterations) {
-//   assert(iterations > 0, '`iterations` must be a number greater than 0');
-//   while (iterations--) data = sha256(data);
-//   return data.toString('hex');
-// }
-//
-// function sha256 (data) {
-//   return crypto.createHash('sha256').update(data).digest();
-// }
+export const hashNTimes = curry((iterations, data) => {
+  assert(iterations > 0, '`iterations` must be a number greater than 0');
+  while (iterations--) data = sha256(data);
+  return data;
+})

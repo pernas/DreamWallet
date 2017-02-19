@@ -28,7 +28,7 @@ const styles = {
   }
 }
 
-let combinedActions = Object.assign({}, WalletActions, actions)
+let combinedActions = { ...WalletActions, ...actions }
 let connectPanel = connect((state) => state, combinedActions)
 
 const panels = ({

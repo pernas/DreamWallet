@@ -20,16 +20,11 @@ export const walletReducer = (state = INITIAL_STATE, action) => {
       return over(Lens.addresses, as => as.set(address.get('addr'), address), state)
     }
     case A.SECOND_PASSWORD_ON: {
-      // TODO :: I need to handle dpasswordhash and checks before running
-      // TODO :: I should start using selectors instead of accessing the state
       // TODO :: probably WalletUtils.encrypt should be run before launching the action
-      // and it should return Either error wallet and then show UI error if some keys are not able to decrypt
-      const password = action.payload
-      return WalletUtils.encrypt(password)(state)
+      return state
     }
     case A.SECOND_PASSWORD_OFF: {
-      const password = action.payload
-      return WalletUtils.decrypt(password)(state)
+      return state
     }
     default:
       return state

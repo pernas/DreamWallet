@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import bitcoin from 'bitcoinjs-lib'
+import { Immutable } from 'dream-wallet'
+const encrypt = Immutable.WalletUtils.encrypt
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
@@ -45,16 +47,31 @@ class Test extends Component {
     this.state = { password: 'my second password' }
   }
 
+  activate (pwd) {
+    // console.log(Immutable.WalletUtils.testEncryption())
+    // check for second password -> Immutable.WalletUtils.isValidSecondPwd
+    // const EitherWallet = Immutable.WalletUtils.encrypt(pwd, this.props.wallet)
+    // EitherWallet.map(loadWallet).orElse(EncryptionErrorActionUIorSomething)
+    // since the encrypted wallet is created here and passed as action.payload, we can use LOAD_WALLET action
+    this.props.secondPasswordOn(pwd)  // this is doing nothing now
+  }
+  deactivate (pwd) {
+    // check for second password -> Immutable.WalletUtils.isValidSecondPwd
+    // const EitherWallet = Immutable.WalletUtils.decrypt(pwd, this.props.wallet)
+    // EitherWallet.map(loadWallet).orElse(EncryptionErrorActionUIorSomething)
+    this.props.secondPasswordOff(pwd)  // this is doing nothing now
+  }
+
   render () {
-    const { addAddress, clearWallet, secondPasswordOn, secondPasswordOff } = this.props
+    const { addAddress, clearWallet } = this.props
     const { password } = this.state
     return (
       <div>
         <h2>Test Component</h2>
         <div style={styles.row}>
           <TextField style={styles.input} value={password} onChange={link(this, 'password')} placeholder='password' />
-          <RaisedButton style={styles.rowButton} primary label='password on' onClick={() => secondPasswordOn(password)} />
-          <RaisedButton style={styles.rowButton} secondary label='password off' onClick={() => secondPasswordOff(password)} />
+          <RaisedButton style={styles.rowButton} primary label='password on' onClick={this.activate.bind(this, password)} />
+          <RaisedButton style={styles.rowButton} secondary label='password off' onClick={this.deactivate.bind(this, password)} />
         </div>
         <div style={styles.row}>
           <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />
