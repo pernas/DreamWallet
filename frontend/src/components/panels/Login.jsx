@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
-import { Network } from 'dream-wallet'
+import { createWalletApi } from 'dream-wallet/lib/network'
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
@@ -19,6 +19,7 @@ class Login extends Component {
       sharedKey: '00efae13-985b-4858-81ad-71bd8b5ac863',
       password: '100 cent'
     }
+    this.api = createWalletApi()
   }
 
   render () {
@@ -27,7 +28,7 @@ class Login extends Component {
 
     let login = () => {
       loginStart()
-      Network.wallet.get(guid, sharedKey, password)
+      this.api.getWallet(guid, sharedKey, password)
         .then(loadWallet)
         .then(loginSuccess)
         .catch(loginError)
