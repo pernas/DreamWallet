@@ -4,12 +4,10 @@ import Address from './Address'
 import Options from './Options'
 import HDWallet from './HDWallet'
 import * as HD from './HDWallet'
-import { compose, map , over, view, curry, identity } from 'ramda'
+import { compose, map , over, view, curry } from 'ramda'
 import { iso, mapped, traversed, traverseOf } from 'ramda-lens'
 import * as Lens from '../lens'
 import { encryptSecPass, decryptSecPass, hashNTimes } from '../WalletCrypto'
-// import prettyI from "pretty-immutable"
-// const print = compose(console.log, prettyI)
 
 const WalletType = Record({
   guid: '',
@@ -22,8 +20,9 @@ const WalletType = Record({
   options: Map()
 })
 
+// /////////////////////////////////////////////////////////////////////////////
+// Wallet Constructor
 const WalletCons = (o) => new WalletType(o)
-// addressMapCons :: [{addr: myaddress, priv, ...}] -> Map('addr', Address)
 const addressMapCons = as => Map(as.map(a => [a.addr, Address(a)]))
 const addresses = over(Lens.addresses, addressMapCons)
 const options = over(Lens.options, Options)
@@ -31,6 +30,7 @@ const hdwallets = over(Lens.hdwallets, compose(map(HDWallet), List))
 const addressBook = over(Lens.addressBook, List)
 const Wallet = compose(addressBook, hdwallets, addresses, options, WalletCons)
 
+// /////////////////////////////////////////////////////////////////////////////
 // To JS support
 const labelsToList = over(Lens.hdwallets, map(HD.labelsToList))
 const addressesToList = over(Lens.addresses, m => m.toList())
@@ -39,8 +39,16 @@ export const fromJS = Wallet
 // more info about the isomorphism can be found here:
 // https://medium.com/@drboolean/lenses-with-immutable-js-9bda85674780#.s591lzg5v
 
-export const testEncryption = () => encrypt('mypassword',Wallet())
+export const wIso = iso(toJS, fromJS)
+// view(wIso, w) :: wallet in pure js (can be used as a lens)
+// With over can be used to apply myFunction acting over pure javascript
+// and returning the immutable structure
+// over(wIso, myFunction, immWallet)
+
+
+// /////////////////////////////////////////////////////////////////////////////
 // second password support
+// /////////////////////////////////////////////////////////////////////////////
 // cipher :: (str => str) -> Wallet -> Either error Wallet
 export const cipher = curry((f, wallet) => {
   // check that example to understand traverse:
@@ -67,6 +75,7 @@ export const encrypt = curry((password, wallet) => {
 })
 
 const checkFailure = str => str === "" ? Either.Left('DECRYPT_FAILURE') : Either.Right(str)
+
 // decrypt :: str -> Wallet -> Either error Wallet
 export const decrypt = curry((password,wallet) => {
   if(view(Lens.doubleEncryption, wallet) && isValidSecondPwd(password, wallet)) {
@@ -82,6 +91,7 @@ export const decrypt = curry((password,wallet) => {
   }
 })
 
+// isValidSecondPwd :: str -> Wallet -> Bool
 export const isValidSecondPwd = curry((password, wallet) => {
   if(view(Lens.doubleEncryption, wallet)) {
     const iterations = view(compose(Lens.options, Lens.pbkdf2Iterations), wallet)
@@ -94,11 +104,6 @@ export const isValidSecondPwd = curry((password, wallet) => {
     return false
   }
 })
-
-export const wIso = iso(toJS, fromJS)
-// view(wIso, w) :: wallet in pure js (can be used as a lens)
-// With over can be used to apply myFunction acting over pure javascript
-// and returning the immutable structure
-// over(wIso, myFunction, immWallet)
+// /////////////////////////////////////////////////////////////////////////////
 
 export default Wallet
