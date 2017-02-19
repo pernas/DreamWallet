@@ -2,7 +2,7 @@ import * as crypto from 'crypto'
 import * as sjcl from 'sjcl'
 import assert from 'assert'
 import * as U from './utils'
-import { curry } from 'ramda'
+import { curry, compose, identity, repeat, reduceRight } from 'ramda'
 import { Left, Right } from 'data.either'
 import { fromJS } from 'immutable'
 
@@ -11,7 +11,7 @@ export const parseDecrypted = (json) => {
     return Right(JSON.parse(json))
   }
   catch (e) {
-    return Left("Wrong password") 
+    return Left("Wrong password")
   }
 }
 
@@ -63,7 +63,7 @@ function stretchPassword (password, salt, iterations, keylen) {
 
 // decryptDataWithPassword :: data -> password -> iterations -> options -> Buffer
 function decryptDataWithPassword (data, password, iterations, options) {
-  assert(data, 'data missing');
+  if(!data) { return data }
   assert(password, 'password missing');
   assert(iterations, 'iterations missing');
 
@@ -93,7 +93,7 @@ function decryptBufferWithKey (payload, iv, key, options) {
 }
 
 function encryptDataWithPassword (data, password, iterations) {
-  assert(data, 'data missing');
+  if(!data) { return data }
   assert(password, 'password missing');
   assert(iterations, 'iterations missing');
 
@@ -122,3 +122,9 @@ export const encryptSecPass = curry((sharedKey, pbkdf2Iterations, password, mess
 
 export const decryptSecPass = curry((sharedKey, pbkdf2Iterations, password, message) =>
   decryptDataWithPassword(message, sharedKey + password, pbkdf2Iterations));
+
+export const hashNTimes = curry((iterations, data) => {
+  assert(iterations > 0, '`iterations` must be a number greater than 0');
+  while (iterations--) data = sha256(data);
+  return data;
+})

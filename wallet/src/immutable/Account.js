@@ -14,8 +14,10 @@ const AccountType = Record({
 
 const AccountCons = (obj) => new AccountType(obj)
 const cache = over(Lens.cache, Cache)
-const addressLabelsMapCons = ls => Map(ls.map(l => [l.index, l.label]))
+const addressLabelsMapCons = ls => Map(ls.map(l => [l.index, l]))
 const addressLabels = over(Lens.addressLabels, addressLabelsMapCons)
 const Account = compose(addressLabels, cache, AccountCons)
+
+export const labelsToList = over(Lens.addressLabels, m => m.toList())
 
 export default Account

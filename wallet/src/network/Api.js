@@ -1,18 +1,18 @@
 import 'isomorphic-fetch'
 import Promise from 'es6-promise'
 import { futurizeP } from 'futurize'
+import { identity } from 'ramda'
 Promise.polyfill()
 
 export const BLOCKCHAIN_INFO = 'https://blockchain.info/'
 export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
 export const API_CODE = '1770d5d9-bcea-4d28-ad21-6cbd5be018a8'
-const id = x => x
 
 const createApi = ({ rootUrl = BLOCKCHAIN_INFO
                    , apiUrl = API_BLOCKCHAIN_INFO
                    , apiCode = API_CODE } = {}, returnType) => {
 
-  const future = returnType ? futurizeP(returnType) : id
+  const future = returnType ? futurizeP(returnType) : identity
   const request = (action, method, data, extraHeaders) => {
     // options
     let options = {
