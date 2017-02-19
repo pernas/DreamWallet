@@ -7,5 +7,5 @@ export const SECOND_PASSWORD_OFF = '@v3.SECOND_PASSWORD_OFF'
 export const addAddress = (address) => ({ type: ADDRESS_ADD, payload: address })
 export const loadWallet = (wallet) => ({ type: WALLET_LOAD, payload: wallet })
 export const clearWallet = () => ({ type: WALLET_CLEAR })
-export const secondPasswordOn = (password) => ({ type: SECOND_PASSWORD_ON, payload: password })
-export const secondPasswordOff = (password) => ({ type: SECOND_PASSWORD_OFF, payload: password })
+export const secondPasswordOn = (newWallet) => ({ type: SECOND_PASSWORD_ON, payload: newWallet })
+export const secondPasswordOff = (newWallet) => ({ type: SECOND_PASSWORD_OFF, payload: newWallet })

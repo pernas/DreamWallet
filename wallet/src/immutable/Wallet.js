@@ -54,7 +54,7 @@ export const cipher = curry((f, wallet) => {
 // encrypt :: str -> Wallet -> Either error Wallet
 export const encrypt = curry((password, wallet) => {
   if(view(Lens.doubleEncryption, wallet)) {
-    return wallet
+    return Either.Right(wallet)
   } else {
     const iterations = view(compose(Lens.options, Lens.pbkdf2Iterations), wallet)
     const sharedKey = view(Lens.sharedKey, wallet)
@@ -78,7 +78,7 @@ export const decrypt = curry((password,wallet) => {
     const setHash = over(Lens.dpasswordhash, () => null)
     return cipher(dec, wallet).map(compose(setHash, setFlag))
   } else {
-    return wallet
+    return Either.Right(wallet)
   }
 })
 

@@ -3,7 +3,6 @@ import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
 import bitcoin from 'bitcoinjs-lib'
 import { Immutable } from 'dream-wallet'
-const encrypt = Immutable.WalletUtils.encrypt
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
@@ -44,22 +43,30 @@ const randomWatchOnly = () => {
 class Test extends Component {
   constructor (props) {
     super(props)
-    this.state = { password: 'my second password' }
+    this.state = { password: 'weakPassword' }
   }
 
+  // corrupted wallet example
+  // guid: 1c562564-6417-41eb-a1f7-19bb754fcbe3
+  // sk: d9008326-f4b3-4183-8d23-65869c07fda6
+  // pwd: m13rd4
+  // priv 2: Gydcze5Z3LxVDwwmtQmHJP1ijKfSCijbBE3mz8vRQtVM
+  // second password: adeu
+
   activate (pwd) {
-    // console.log(Immutable.WalletUtils.testEncryption())
-    // check for second password -> Immutable.WalletUtils.isValidSecondPwd
-    // const EitherWallet = Immutable.WalletUtils.encrypt(pwd, this.props.wallet)
-    // EitherWallet.map(loadWallet).orElse(EncryptionErrorActionUIorSomething)
-    // since the encrypted wallet is created here and passed as action.payload, we can use LOAD_WALLET action
-    this.props.secondPasswordOn(pwd)  // this is doing nothing now
+    Immutable.WalletUtils.encrypt(pwd, this.props.wallet)
+      .map(this.props.secondPasswordOn)
+      // this action maybe it is not accurate (this might happen
+      // if an exception is launched inside encryption)
+      .orElse(this.props.inconsistentWalletStateError)
   }
   deactivate (pwd) {
-    // check for second password -> Immutable.WalletUtils.isValidSecondPwd
-    // const EitherWallet = Immutable.WalletUtils.decrypt(pwd, this.props.wallet)
-    // EitherWallet.map(loadWallet).orElse(EncryptionErrorActionUIorSomething)
-    this.props.secondPasswordOff(pwd)  // this is doing nothing now
+    const wallet = this.props.wallet
+    Immutable.WalletUtils.isValidSecondPwd(pwd, wallet)
+      ? Immutable.WalletUtils.decrypt(pwd, wallet)
+        .map(this.props.secondPasswordOff)
+        .orElse(this.props.inconsistentWalletStateError)
+      : this.props.secondPasswordError(pwd)
   }
 
   render () {
