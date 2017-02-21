@@ -1,18 +1,18 @@
 import 'isomorphic-fetch'
 import Promise from 'es6-promise'
-import { merge } from 'ramda'
+import { merge, identity } from 'ramda'
 import { futurizeP } from 'futurize'
-import { identity } from 'ramda'
 Promise.polyfill()
 
 export const BLOCKCHAIN_INFO = 'https://blockchain.info/'
 export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
 export const API_CODE = '1770d5d9-bcea-4d28-ad21-6cbd5be018a8'
 
-const createApi = ({ rootUrl = BLOCKCHAIN_INFO
-                   , apiUrl = API_BLOCKCHAIN_INFO
-                   , apiCode = API_CODE } = {}, returnType) => {
-
+const createApi = ({
+  rootUrl = BLOCKCHAIN_INFO,
+  apiUrl = API_BLOCKCHAIN_INFO,
+  apiCode = API_CODE
+} = {}, returnType) => {
   const future = returnType ? futurizeP(returnType) : identity
   const request = (action, method, data, extraHeaders) => {
     // options
@@ -44,7 +44,7 @@ const createApi = ({ rootUrl = BLOCKCHAIN_INFO
   // checkStatus :: Response -> Promise Response
   const checkStatus = (r) => {
     return r.ok ? Promise.resolve(r)
-                : Promise.reject({ status: r.status, statusText: r.statusText})
+                : Promise.reject({ status: r.status, statusText: r.statusText })
   }
 
   // extractData :: Response -> Promise (JSON | BLOB | TEXT)
@@ -80,14 +80,21 @@ const createApi = ({ rootUrl = BLOCKCHAIN_INFO
   }
   // saveWallet :: () -> Promise JSON
   const saveWallet = (data) => {
-    const config = { method: 'update', format: 'plain'}
+    const config = { method: 'update', format: 'plain' }
     return request('POST', 'wallet', merge(config, data))
       .then(() => data.checksum)
+  }
+
+  const fetchBlockchainData = (context, { n = 50 } = {}) => {
+    context = Array.isArray(context) ? context : [context]
+    let url = `${rootUrl}multiaddr?active=${context}&cors=true&n=${n}`
+    return fetch(url).then(res => res.json())
   }
 
   return {
     fetchWalletWithSharedKey: future(fetchWalletWithSharedKey),
     saveWallet: future(saveWallet),
+    fetchBlockchainData: future(fetchBlockchainData)
   }
 }
 
