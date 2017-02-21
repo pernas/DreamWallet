@@ -1,6 +1,7 @@
 import { Record, List, Map } from 'immutable-ext'
 import Either from 'data.either'
 import Address from './Address'
+import * as Addr from './Address'
 import Options from './Options'
 import HDWallet from './HDWallet'
 import * as HD from './HDWallet'
@@ -105,5 +106,21 @@ export const isValidSecondPwd = curry((password, wallet) => {
   }
 })
 // /////////////////////////////////////////////////////////////////////////////
+// add address (encrypted if needed)
+// addAddress :: Wallet -> Address -> String -> Wallet
+export const addAddress = curry((wallet, address, password) => {
+  const it = view(compose(Lens.options, Lens.pbkdf2Iterations), wallet)
+  const sk = view(Lens.sharedKey, wallet)
+  const append = (a) => over(Lens.addresses, as => as.set(view(Lens.addr, a), a), wallet)
+  if (!view(Lens.doubleEncryption ,wallet)) {
+    return append(address)
+  } else {
+    if (isValidSecondPwd(password, wallet)) {
+      return append(Addr.encrypt(it, sk, password, address))
+    } else {
+      return wallet
+    }
+  }
+})
 
 export default Wallet

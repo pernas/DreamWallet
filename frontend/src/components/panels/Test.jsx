@@ -44,7 +44,11 @@ const randomWatchOnly = () => {
 class Test extends Component {
   constructor (props) {
     super(props)
-    this.state = { password: 'weakPassword' }
+    this.state = {
+      password: 'weakPassword',
+      address: '',
+      label: ''
+    }
   }
 
   // corrupted wallet example
@@ -71,8 +75,8 @@ class Test extends Component {
   }
 
   render () {
-    const { addAddress, clearWallet } = this.props
-    const { password } = this.state
+    const { addAddress, clearWallet, addLabel } = this.props
+    const { password, address, label } = this.state
     return (
       <div>
         <h2>Test Component</h2>
@@ -86,6 +90,12 @@ class Test extends Component {
           <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random(), password)} />
           <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly(), password)} />
         </div>
+        <div style={styles.row}>
+          <TextField style={styles.input} value={address} onChange={link(this, 'address')} placeholder='address' />
+          <TextField style={styles.input} value={label} onChange={link(this, 'label')} placeholder='label' />
+          <RaisedButton style={styles.rowButton} primary label='Label' onClick={() => addLabel(address, label)} />
+        </div>
+
       </div>
     )
   }

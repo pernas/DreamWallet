@@ -19,22 +19,14 @@ export const walletReducer = (state = INITIAL_STATE, action) => {
       return Wallet()
     }
     case A.ADDRESS_ADD: {
-      // this is an example writing the logic on the reducer
-      // probably is better to break this into pieces or write it better
       const {address, secondPassword} = action.payload
-      const iterations = view(compose(Lens.options, Lens.pbkdf2Iterations), state)
-      const sharedKey = view(Lens.sharedKey, state)
-      const plainAddress = Address(address)
-      const isSP = view(Lens.doubleEncryption ,state)
-      const isVSP = isSP && WalletUtils.isValidSecondPwd(secondPassword, state)
-      const finalAddress = isVSP
-        ? over(Lens.priv , encryptSecPass(sharedKey, iterations, secondPassword), plainAddress)
-        : plainAddress
-      if (isSP && !isVSP) {
-        return state
-      } else {
-        return over(Lens.addresses, as => as.set(finalAddress.get('addr'), finalAddress), state)
-      }
+      return WalletUtils.addAddress(state, Address(address), secondPassword)
+    }
+    case A.ADDRESS_LABEL: {
+      const {address, label} = action.payload
+      const myAddressLens = compose(Lens.addresses, Lens.iLensProp(address));
+      if(!view(myAddressLens, state)) { return state }
+      return set(compose(myAddressLens, Lens.label), label ,state)
     }
     default:
       return state
