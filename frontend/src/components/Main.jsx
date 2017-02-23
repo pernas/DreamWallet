@@ -19,11 +19,12 @@ const styles = {
 }
 
 class Main extends Component {
+
   render () {
     return (
       <div style={styles.wrapper}>
         <Paper style={styles.json} zDepth={3}>
-          <pre>{JSON.stringify(toJS(this.props.wallet), null, 2)}</pre>
+          <pre>{JSON.stringify(toJS(this.props.wallet.get('wallet')), null, 2)}</pre>
         </Paper>
         <ControlPanel />
       </div>

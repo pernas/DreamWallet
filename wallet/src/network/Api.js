@@ -1,5 +1,6 @@
 import 'isomorphic-fetch'
 import Promise from 'es6-promise'
+import { merge } from 'ramda'
 import { futurizeP } from 'futurize'
 import { identity } from 'ramda'
 Promise.polyfill()
@@ -72,14 +73,21 @@ const createApi = ({ rootUrl = BLOCKCHAIN_INFO
       : ''
   }
 
-  // fetchWalletWithSharedKey :: () -> Promise JSON
+  // fetchWalletWithSharedKey :: (String, String) -> Promise JSON
   const fetchWalletWithSharedKey = (guid, sharedKey) => {
     var data = { guid, sharedKey, method: 'wallet.aes.json', format: 'json' }
     return request('POST', 'wallet', data)
   }
+  // saveWallet :: () -> Promise JSON
+  const saveWallet = (data) => {
+    const config = { method: 'update', format: 'plain'}
+    return request('POST', 'wallet', merge(config, data))
+      .then(() => data.checksum)
+  }
 
   return {
-    fetchWalletWithSharedKey: future(fetchWalletWithSharedKey)
+    fetchWalletWithSharedKey: future(fetchWalletWithSharedKey),
+    saveWallet: future(saveWallet),
   }
 }
 

@@ -59,14 +59,14 @@ class Test extends Component {
   // second password: adeu
 
   activate (pwd) {
-    Immutable.WalletUtils.encrypt(pwd, this.props.wallet)
+    Immutable.WalletUtils.encrypt(pwd, this.props.wallet.get('wallet'))
       .map(this.props.secondPasswordOn)
       // this action maybe it is not accurate (this might happen
       // if an exception is launched inside encryption)
       .orElse(this.props.inconsistentWalletStateError)
   }
   deactivate (pwd) {
-    const wallet = this.props.wallet
+    const wallet = this.props.wallet.get('wallet')
     Immutable.WalletUtils.isValidSecondPwd(pwd, wallet)
       ? Immutable.WalletUtils.decrypt(pwd, wallet)
         .map(this.props.secondPasswordOff)
@@ -75,7 +75,7 @@ class Test extends Component {
   }
 
   render () {
-    const { addAddress, clearWallet, addLabel } = this.props
+    const { addAddress, clearWallet, addLabel, changeMainPassword } = this.props
     const { password, address, label } = this.state
     return (
       <div>
@@ -84,6 +84,7 @@ class Test extends Component {
           <TextField style={styles.input} value={password} onChange={link(this, 'password')} placeholder='password' />
           <RaisedButton style={styles.rowButton} primary label='password on' onClick={this.activate.bind(this, password)} />
           <RaisedButton style={styles.rowButton} secondary label='password off' onClick={this.deactivate.bind(this, password)} />
+          <RaisedButton style={styles.rowButton} primary label='main password change' onClick={() => changeMainPassword(password)} />
         </div>
         <div style={styles.row}>
           <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />

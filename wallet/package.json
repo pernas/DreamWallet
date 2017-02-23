@@ -50,6 +50,7 @@
     "ramda-lens": "git@github.com:ramda/ramda-lens.git",
     "redux": "^3.6.0",
     "redux-actions": "^1.2.1",
+    "redux-immutable": "^3.1.0",
     "redux-logger": "^2.8.1",
     "sjcl": "1.0.3"
   }
