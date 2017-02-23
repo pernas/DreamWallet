@@ -85,9 +85,9 @@ const createApi = ({
       .then(() => data.checksum)
   }
 
-  const fetchBlockchainData = (context, { n = 50 } = {}) => {
+  const fetchBlockchainData = (context, { n = 50, offset = 0 } = {}) => {
     context = Array.isArray(context) ? context : [context]
-    let url = `${rootUrl}multiaddr?active=${context}&cors=true&n=${n}`
+    let url = `${rootUrl}multiaddr?active=${context.join('|')}&cors=true&n=${n}&offset=${offset}`
     return fetch(url).then(res => res.json())
   }
 

@@ -1,26 +1,37 @@
-import Data from '../immutable/Data'
-
-export const TRANSACTIONS_ADD = '@v3.TRANSACTIONS_ADD'
-export const TRANSACTIONS_ADD_MUL = '@v3.TRANSACTIONS_ADD_MUL'
-export const TRANSACTIONS_CLEAR = '@v3.TRANSACTIONS_CLEAR'
-
-export const addTransaction = (tx) => ({ type: TRANSACTIONS_ADD, payload: tx })
-export const addTransactions = (txs) => ({ type: TRANSACTIONS_ADD_MUL, payload: txs })
-export const clearTransactions = () => ({ type: TRANSACTIONS_CLEAR })
-
-export const BLOCKCHAIN_DATA_LOAD = '@v3.BLOCKCHAIN_DATA_LOAD'
-export const BLOCKCHAIN_DATA_CLEAR = '@v3.BLOCKCHAIN_DATA_CLEAR'
+import { List, OrderedMap } from 'immutable'
+import { set, over } from 'ramda'
+import { iLensPath } from '../lens'
+import { Data, WalletInfo, Info, Block, AddressInfo, Tx } from '../immutable'
+import { WALLET_CLEAR, WALLET_DATA_LOAD, CONTEXT_TXS_LOAD, CONTEXT_TXS_CLEAR } from '../actions'
 
 const INITIAL_STATE = Data()
 
-const transactionsReducer = (state = INITIAL_STATE, action) => {
+let makeTxsLens = (context) => iLensPath(['addressesInfo', context, 'transactions'])
+
+const blockchainDataReducer = (state = INITIAL_STATE, action) => {
   let { type } = action
   switch (type) {
-    case BLOCKCHAIN_DATA_LOAD: {
-      let { payload: data } = action
-      return data
+    case WALLET_DATA_LOAD: {
+      let { payload } = action
+      // NOTE: more of this setting should be handled by the data structures themselves
+      state = state.set('info', Info({ latest_block: Block(payload.info.latest_block) }))
+      state = state.set('walletInfo', WalletInfo(payload.wallet))
+      let as = OrderedMap(payload.addresses.map(AddressInfo).map(a => [a.address, a]))
+      state = state.set('addressesInfo', as)
+      return state
     }
-    case BLOCKCHAIN_DATA_CLEAR: {
+    case CONTEXT_TXS_LOAD: {
+      // NOTE: how to handle txs for groups (all legacy addresses)? selector?
+      let { payload } = action
+      let txs = List(payload.txs.map(Tx))
+      let txsLens = makeTxsLens(payload.addresses[0].address)
+      return over(txsLens, t => t.concat(txs), state)
+    }
+    case CONTEXT_TXS_CLEAR: {
+      let { payload: context } = action
+      return set(makeTxsLens(context), List(), state)
+    }
+    case WALLET_CLEAR: {
       return INITIAL_STATE
     }
     default:
@@ -28,4 +39,4 @@ const transactionsReducer = (state = INITIAL_STATE, action) => {
   }
 }
 
-export default transactionsReducer
+export default blockchainDataReducer

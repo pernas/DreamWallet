@@ -1,4 +1,4 @@
-import { Record, List, Map } from 'immutable-ext'
+import { Record, List, Map, OrderedMap } from 'immutable-ext'
 import Either from 'data.either'
 import Address from './Address'
 import * as Addr from './Address'
@@ -16,9 +16,9 @@ const WalletType = Record({
   double_encryption: false,
   dpasswordhash: null,
   address_book: List(),
-  keys: Map(),
+  keys: OrderedMap(),
   hd_wallets: List(),
-  options: Map()
+  options: OrderedMap()
 })
 
 // /////////////////////////////////////////////////////////////////////////////
