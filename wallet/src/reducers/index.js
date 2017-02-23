@@ -93,8 +93,6 @@ export const payload_checksum = (state = '', action) => {
       return action.payload.get('payload_checksum')
     }
     case A.PAYLOAD_CHECKSUM_CHANGE: {
-      console.log('here in the reducer')
-      console.log(action)
       return action.payload
     }
     default:
