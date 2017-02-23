@@ -82,6 +82,7 @@ const createApi = ({ rootUrl = BLOCKCHAIN_INFO
   const saveWallet = (data) => {
     const config = { method: 'update', format: 'plain'}
     return request('POST', 'wallet', merge(config, data))
+      .then(() => data.checksum)
   }
 
   return {
