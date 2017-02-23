@@ -4,15 +4,19 @@ import * as Lens from '../lens'
 import * as A from '../actions'
 import { Wallet, WalletUtils, Address } from '../immutable'
 import { encryptSecPass } from '../WalletCrypto'
+import { Map } from 'immutable-ext'
+import { combineReducers } from 'redux-immutable'
 
-const INITIAL_STATE = Wallet()
+export const WALLET_INITIAL_STATE = Wallet()
 
-export const walletReducer = (state = INITIAL_STATE, action) => {
+export const wallet = (state = WALLET_INITIAL_STATE, action) => {
   const { type } = action
   switch (type) {
-    case A.SECOND_PASSWORD_ON:
-    case A.SECOND_PASSWORD_OFF:
     case A.WALLET_LOAD: {
+      return action.payload.get('wallet')
+    }
+    case A.SECOND_PASSWORD_ON:
+    case A.SECOND_PASSWORD_OFF:{
       return action.payload
     }
     case A.WALLET_CLEAR: {
@@ -32,3 +36,110 @@ export const walletReducer = (state = INITIAL_STATE, action) => {
       return state
   }
 }
+
+// ///////////////////////////////////////////////////////////////////////////
+export const pbkdf2_iterations = (state = 5000, action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return 5000
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('pbkdf2_iterations')
+    }
+    default:
+      return state
+  }
+}
+
+export const password = (state = '', action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return ''
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('password')
+    }
+    case A.MAIN_PASSWORD_CHANGE: {
+      return action.payload
+    }
+    default:
+      return state
+  }
+}
+
+export const version = (state = 3, action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return 3
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('version')
+    }
+    default:
+      return state
+  }
+}
+
+export const payload_checksum = (state = '', action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return ''
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('payload_checksum')
+    }
+    default:
+      return state
+  }
+}
+
+export const language = (state = 'en', action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return 'en'
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('language')
+    }
+    default:
+      return state
+  }
+}
+
+
+export const sync_pubkeys = (state = false, action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return false
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('sync_pubkeys')
+    }
+    default:
+      return state
+  }
+}
+
+export const war_checksum = (state = '', action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return ''
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('war_checksum')
+    }
+    default:
+      return state
+  }
+}
+
+export const walletReducer = combineReducers({
+  wallet, pbkdf2_iterations, password, version, payload_checksum, language, sync_pubkeys, war_checksum
+})

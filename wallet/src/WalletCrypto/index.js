@@ -2,16 +2,20 @@ import * as crypto from 'crypto'
 import * as sjcl from 'sjcl'
 import assert from 'assert'
 import * as U from './utils'
-import { curry, compose, identity, repeat, reduceRight } from 'ramda'
-import { Left, Right } from 'data.either'
+import { curry, compose, identity, repeat, reduceRight, lensProp, assoc, dissoc, over, view } from 'ramda'
+import { traverseOf } from 'ramda-lens'
+import Either from 'data.either'
 import { fromJS } from 'immutable'
+import { WalletUtils } from '../immutable'
+import * as Lens from '../lens'
+
 
 export const parseDecrypted = (json) => {
   try {
-    return Right(JSON.parse(json))
+    return Either.Right(JSON.parse(json))
   }
   catch (e) {
-    return Left("Wrong password")
+    return Either.Left("Wrong password")
   }
 }
 
@@ -25,12 +29,46 @@ export const decryptWallet = curry(
 const decryptWrapper = curry(
   function(password, wrapper){
     try {
-      return Right(decryptDataWithPassword(wrapper.payload, password, wrapper.pbkdf2_iterations));
+      return Either.Right(decryptDataWithPassword(wrapper.payload, password, wrapper.pbkdf2_iterations));
     } catch (e){
-      return Left(e)
+      return Either.Left(e)
     }
   }
 )
+
+
+// decryptPayload :: String -> ServerPayload -> Either error DecryptedPayload
+export const decryptPayload = password => payload => {
+  const plens = lensProp('payload');
+  const ilens = lensProp('pbkdf2_iterations');
+  const vlens = lensProp('version');
+  const iter = view(compose(plens, ilens), payload)
+  const ver = view(compose(plens, vlens), payload)
+  return traverseOf(plens, Either.of, decryptWallet(password), payload)
+         .map(o => assoc('version', ver, o))
+         .map(o => assoc('pbkdf2_iterations', iter, o))
+         .map(o => assoc('wallet', o.payload, o))
+         .map(o => dissoc('payload', o))
+         .map(o => assoc('password', password, o))
+}
+
+// encryptState :: State -> JSON
+export const encryptState = state => {
+  const json = WalletUtils.toJS(state.get('wallet'));
+  const serialized = JSON.stringify(json);
+  const iterations = view(Lens.pbkdf2Iterations, state)
+  const password = view(Lens.password, state)
+  const encrypted = encryptWallet(serialized, password, iterations, 3.0);
+  return ({
+    guid: json.guid,
+    sharedKey: json.sharedKey,
+    length: encrypted.length,
+    payload: encrypted,
+    checksum: sha256(encrypted).toString('hex'),
+    old_checksum: view(Lens.payloadChecksum, state),
+    language: view(Lens.language, state)
+  });
+}
 
 export const encryptWallet = curry((data, password, pbkdf2Iterations, version) => {
   assert(data, 'data missing');
