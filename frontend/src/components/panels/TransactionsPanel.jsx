@@ -16,7 +16,7 @@ class TransactionsPanel extends Component {
     let { blockchainData, requestTxs, clearTxs } = this.props
     let { addr } = this.state
     let info = blockchainData.addressesInfo.get(addr)
-    let txs = info.get('transactions').toJS()
+    let txs = info ? info.get('transactions').toJS() : []
     let load = () => requestTxs(addr)
     let clear = () => clearTxs(addr)
 
