@@ -36,20 +36,11 @@ const styles = {
   }
 }
 
-let combinedActions = { ...WalletActions, ...actions }
-let connectPanel = connect((state) => state, combinedActions)
-
-const panels = ({
-  'login': connectPanel(Login),
-  'txs': connectPanel(TransactionsPanel),
-  'test': connectPanel(Test)
-})
-
 const PanelButton = ({ active, forPanel: p, onClick }) => (
   <RaisedButton style={styles.panelButton} primary={active === p} label={p} onClick={() => onClick(p)} />
 )
 
-const PanelHeader = ({ active, onChangePanel }) => (
+const PanelHeader = ({ active, panels, onChangePanel }) => (
   <div style={styles.header}>
     <div>
       {Object.keys(panels).map(p => (
@@ -66,12 +57,26 @@ class ControlPanel extends Component {
     this.state = { panel: 'login' }
   }
   render () {
+    let { selected } = this.props
     let { panel } = this.state
+
+    let { requestTxs, clearTxs } = WalletActions
+    let enhancedActions = WalletActions.enhanceActionCreatorsForMulti(selected, WalletActions)
+    let combinedActions = { ...enhancedActions, ...{ requestTxs, clearTxs }, ...actions }
+    let connectPanel = connect((state) => state, combinedActions)
+
+    const panels = ({
+      'login': connectPanel(Login),
+      'login2': connectPanel(Login),
+      'txs': connectPanel(TransactionsPanel),
+      'test': connectPanel(Test)
+    })
+
     let SelectedPanel = panels[panel]
     return (
       <Paper style={styles.panel} zDepth={3}>
-        <PanelHeader active={panel} onChangePanel={(panel) => this.setState({ panel })} />
-        <div style={styles.controls}>{SelectedPanel ? <SelectedPanel /> : null}</div>
+        <PanelHeader active={panel} panels={panels} onChangePanel={(panel) => this.setState({ panel })} />
+        <div style={styles.controls}>{SelectedPanel ? <SelectedPanel panel={panel} selected={selected} /> : null}</div>
       </Paper>
     )
   }

@@ -5,6 +5,7 @@ export const ADD_MORE_TRANSACTIONS = 'ADD_MORE_TRANSACTIONS'
 export const SECOND_PASSWORD_ERROR = 'SECOND_PASSWORD_ERROR'
 export const INCONSISTENT_WALLET_STATE_ERROR = 'INCONSISTENT_WALLET_STATE_ERROR'
 export const SAVE_SESSION = 'SAVE_SESSION'
+export const SELECTION_SET = 'SELECTION_SET'
 
 export const receiveTransactions = txs => ({
   type: RECEIVE_TRANSACTIONS,
@@ -39,3 +40,5 @@ export const secondPasswordError = (payload) => ({ type: SECOND_PASSWORD_ERROR, 
 export const inconsistentWalletStateError = (payload) => ({ type: INCONSISTENT_WALLET_STATE_ERROR, payload, error: true })
 
 export const saveSession = (payload) => ({ type: SAVE_SESSION, payload })
+
+export const setSelection = (selection) => ({ type: SELECTION_SET, payload: selection })

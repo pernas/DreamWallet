@@ -31,6 +31,8 @@ export const rootSaga = api => {
 
   return function* () {
     yield takeEvery(A.WALLET_LOAD, walletLoadSaga)
+    // this is currently broken because WALLET_LOAD is wrapped in MULTI_WALLET_DISPATCH
+    // fix by having multiWalletReducer handle blockchain data as well?
     yield takeEvery(A.TXS_LOAD_REQUEST, txsLoadRequestSaga)
   }
 }
