@@ -2,7 +2,8 @@ import createLogger from 'redux-logger'
 import { createStore, applyMiddleware, compose } from 'redux'
 import reducers from '../reducers'
 import createSagaMiddleware from 'redux-saga'
-import { rootSaga } from 'dream-wallet/lib/sagas'
+import { rootSaga } from '../sagas'
+import persistState from 'redux-localstorage'
 
 // import { Socket } from 'dream-wallet/lib/network'
 import { blockchainDataMiddleware, walletSyncMiddleware, walletSocketMiddleware } from 'dream-wallet/lib/middleware'
@@ -15,6 +16,7 @@ const configureStore = () => {
   const store = createStore(
     reducers,
     compose(
+      persistState('session'),
       applyMiddleware(
         // walletSyncMiddleware({ api, path: 'wallet' }),
         // walletSocketMiddleware({ socket }),

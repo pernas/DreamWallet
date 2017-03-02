@@ -78,8 +78,13 @@ export const encrypt = curry((password, wallet) => {
 const checkFailure = str => str === "" ? Either.Left('DECRYPT_FAILURE') : Either.Right(str)
 
 // decrypt :: str -> Wallet -> Either error Wallet
-export const decrypt = curry((password,wallet) => {
-  if(view(Lens.doubleEncryption, wallet) && isValidSecondPwd(password, wallet)) {
+export const decrypt = curry((password, wallet) => {
+  if(view(Lens.doubleEncryption, wallet)) {
+    // this is not supposed to be used for error handling.
+    // But we should notify the action dispatcher that he did something wrong
+    if(! isValidSecondPwd(password, wallet)) {
+      throw new Error('INVALID_SECOND_PASSWORD')
+    }
     const iterations = view(compose(Lens.options, Lens.pbkdf2Iterations), wallet)
     const sharedKey = view(Lens.sharedKey, wallet)
     const tryDec = Either.try(decryptSecPass(sharedKey, iterations, password))
@@ -118,7 +123,7 @@ export const addAddress = curry((wallet, address, password) => {
     if (isValidSecondPwd(password, wallet)) {
       return append(Addr.encrypt(it, sk, password, address))
     } else {
-      return wallet
+      throw new Error('INVALID_SECOND_PASSWORD')
     }
   }
 })

@@ -42,10 +42,7 @@ const createApi = ({
   }
 
   // checkStatus :: Response -> Promise Response
-  const checkStatus = (r) => {
-    return r.ok ? Promise.resolve(r)
-                : Promise.reject({ status: r.status, statusText: r.statusText })
-  }
+  const checkStatus = (r) => r.ok ? Promise.resolve(r) : r.json().then(j => Promise.reject(j))
 
   // extractData :: Response -> Promise (JSON | BLOB | TEXT)
   const extractData = (r) => {
@@ -78,6 +75,13 @@ const createApi = ({
     var data = { guid, sharedKey, method: 'wallet.aes.json', format: 'json' }
     return request('POST', 'wallet', data)
   }
+
+  // fetchWallet :: (String) -> Promise JSON
+  const fetchWallet = (guid, sessionToken) => {
+    var headers = { sessionToken }
+    var data = { format: 'json', resend_code: null };
+    return request('GET', 'wallet/' + guid, data, headers)
+  }
   // saveWallet :: () -> Promise JSON
   const saveWallet = (data) => {
     const config = { method: 'update', format: 'plain' }
@@ -91,10 +95,40 @@ const createApi = ({
     return fetch(url).then(res => res.json())
   }
 
+  // TODO :: obtain and establish might be done better and one function alone
+  const obtainSessionToken = () => {
+    var processResult = function (data) {
+      if (!data.token || !data.token.length) {
+        return Promise.reject('Invalid session token');
+      }
+      return data.token;
+    };
+    return request('POST', 'wallet/sessions').then(processResult);
+  }
+
+  const establishSession = token => {
+    if (token) {
+      return Promise.resolve(token);
+    } else {
+      return obtainSessionToken();
+    }
+  }
+
+  const pollForSessioGUID = sessionToken => {
+    const p = x => {console.log(x); return x}
+    var data = { format: 'json' }
+    var headers = { sessionToken }
+    request('GET', 'wallet/poll-for-session-guid', data, headers).then(p)
+  }
+
   return {
     fetchWalletWithSharedKey: future(fetchWalletWithSharedKey),
     saveWallet: future(saveWallet),
-    fetchBlockchainData: future(fetchBlockchainData)
+    fetchBlockchainData: future(fetchBlockchainData),
+    obtainSessionToken: future(obtainSessionToken),
+    establishSession: future(establishSession),
+    pollForSessioGUID: future(pollForSessioGUID),
+    fetchWallet: future(fetchWallet)
   }
 }
 

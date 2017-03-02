@@ -27,11 +27,7 @@ class Login extends Component {
     let { guid, sharedKey, password } = this.state
 
     let login = () => {
-      loginStart()
-      this.api.getWallet(guid, sharedKey, password)
-        .then(loadWallet)
-        .then(loginSuccess)
-        .catch(loginError)
+      loginStart({guid, sharedKey, password})
     }
 
     return (
