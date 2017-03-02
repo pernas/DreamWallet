@@ -1,18 +1,18 @@
 import 'isomorphic-fetch'
 import Promise from 'es6-promise'
-import { merge } from 'ramda'
+import { merge, identity } from 'ramda'
 import { futurizeP } from 'futurize'
-import { identity } from 'ramda'
 Promise.polyfill()
 
 export const BLOCKCHAIN_INFO = 'https://blockchain.info/'
 export const API_BLOCKCHAIN_INFO = 'https://api.blockchain.info/'
 export const API_CODE = '1770d5d9-bcea-4d28-ad21-6cbd5be018a8'
 
-const createApi = ({ rootUrl = BLOCKCHAIN_INFO
-                   , apiUrl = API_BLOCKCHAIN_INFO
-                   , apiCode = API_CODE } = {}, returnType) => {
-
+const createApi = ({
+  rootUrl = BLOCKCHAIN_INFO,
+  apiUrl = API_BLOCKCHAIN_INFO,
+  apiCode = API_CODE
+} = {}, returnType) => {
   const future = returnType ? futurizeP(returnType) : identity
   const request = (action, method, data, extraHeaders) => {
     // options
@@ -42,10 +42,7 @@ const createApi = ({ rootUrl = BLOCKCHAIN_INFO
   }
 
   // checkStatus :: Response -> Promise Response
-  const checkStatus = (r) => {
-    return r.ok ? Promise.resolve(r)
-                : Promise.reject({ status: r.status, statusText: r.statusText})
-  }
+  const checkStatus = (r) => r.ok ? Promise.resolve(r) : r.json().then(j => Promise.reject(j))
 
   // extractData :: Response -> Promise (JSON | BLOB | TEXT)
   const extractData = (r) => {
@@ -78,16 +75,60 @@ const createApi = ({ rootUrl = BLOCKCHAIN_INFO
     var data = { guid, sharedKey, method: 'wallet.aes.json', format: 'json' }
     return request('POST', 'wallet', data)
   }
+
+  // fetchWallet :: (String) -> Promise JSON
+  const fetchWallet = (guid, sessionToken) => {
+    var headers = { sessionToken }
+    var data = { format: 'json', resend_code: null };
+    return request('GET', 'wallet/' + guid, data, headers)
+  }
   // saveWallet :: () -> Promise JSON
   const saveWallet = (data) => {
-    const config = { method: 'update', format: 'plain'}
+    const config = { method: 'update', format: 'plain' }
     return request('POST', 'wallet', merge(config, data))
       .then(() => data.checksum)
+  }
+
+  const fetchBlockchainData = (context, { n = 50, offset = 0 } = {}) => {
+    context = Array.isArray(context) ? context : [context]
+    let url = `${rootUrl}multiaddr?active=${context.join('|')}&cors=true&n=${n}&offset=${offset}`
+    return fetch(url).then(res => res.json())
+  }
+
+  // TODO :: obtain and establish might be done better and one function alone
+  const obtainSessionToken = () => {
+    var processResult = function (data) {
+      if (!data.token || !data.token.length) {
+        return Promise.reject('Invalid session token');
+      }
+      return data.token;
+    };
+    return request('POST', 'wallet/sessions').then(processResult);
+  }
+
+  const establishSession = token => {
+    if (token) {
+      return Promise.resolve(token);
+    } else {
+      return obtainSessionToken();
+    }
+  }
+
+  const pollForSessioGUID = sessionToken => {
+    const p = x => {console.log(x); return x}
+    var data = { format: 'json' }
+    var headers = { sessionToken }
+    request('GET', 'wallet/poll-for-session-guid', data, headers).then(p)
   }
 
   return {
     fetchWalletWithSharedKey: future(fetchWalletWithSharedKey),
     saveWallet: future(saveWallet),
+    fetchBlockchainData: future(fetchBlockchainData),
+    obtainSessionToken: future(obtainSessionToken),
+    establishSession: future(establishSession),
+    pollForSessioGUID: future(pollForSessioGUID),
+    fetchWallet: future(fetchWallet)
   }
 }
 

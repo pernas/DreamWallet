@@ -1,11 +1,11 @@
-import { Record, List, Map } from 'immutable-ext'
+import { Record, List, Map, OrderedMap } from 'immutable-ext'
 import Either from 'data.either'
 import Address from './Address'
 import * as Addr from './Address'
 import Options from './Options'
 import HDWallet from './HDWallet'
 import * as HD from './HDWallet'
-import { compose, map , over, view, curry } from 'ramda'
+import { compose, map ,over, view, curry } from 'ramda'
 import { iso, mapped, traversed, traverseOf } from 'ramda-lens'
 import * as Lens from '../lens'
 import { encryptSecPass, decryptSecPass, hashNTimes } from '../WalletCrypto'
@@ -16,9 +16,9 @@ const WalletType = Record({
   double_encryption: false,
   dpasswordhash: null,
   address_book: List(),
-  keys: Map(),
+  keys: OrderedMap(),
   hd_wallets: List(),
-  options: Map()
+  options: OrderedMap()
 })
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -78,8 +78,13 @@ export const encrypt = curry((password, wallet) => {
 const checkFailure = str => str === "" ? Either.Left('DECRYPT_FAILURE') : Either.Right(str)
 
 // decrypt :: str -> Wallet -> Either error Wallet
-export const decrypt = curry((password,wallet) => {
-  if(view(Lens.doubleEncryption, wallet) && isValidSecondPwd(password, wallet)) {
+export const decrypt = curry((password, wallet) => {
+  if(view(Lens.doubleEncryption, wallet)) {
+    // this is not supposed to be used for error handling.
+    // But we should notify the action dispatcher that he did something wrong
+    if(! isValidSecondPwd(password, wallet)) {
+      throw new Error('INVALID_SECOND_PASSWORD')
+    }
     const iterations = view(compose(Lens.options, Lens.pbkdf2Iterations), wallet)
     const sharedKey = view(Lens.sharedKey, wallet)
     const tryDec = Either.try(decryptSecPass(sharedKey, iterations, password))
@@ -118,7 +123,7 @@ export const addAddress = curry((wallet, address, password) => {
     if (isValidSecondPwd(password, wallet)) {
       return append(Addr.encrypt(it, sk, password, address))
     } else {
-      return wallet
+      throw new Error('INVALID_SECOND_PASSWORD')
     }
   }
 })

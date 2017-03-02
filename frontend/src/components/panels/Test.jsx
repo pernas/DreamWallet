@@ -75,7 +75,7 @@ class Test extends Component {
   }
 
   render () {
-    const { addAddress, clearWallet, addLabel, changeMainPassword } = this.props
+    const { addAddress, clearWallet, addLabel, changeMainPassword, saveSession } = this.props
     const { password, address, label } = this.state
     return (
       <div>
@@ -90,6 +90,7 @@ class Test extends Component {
           <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />
           <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random(), password)} />
           <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly(), password)} />
+          <RaisedButton style={styles.rowButton} primary label='save session' onClick={() => saveSession(password)} />
         </div>
         <div style={styles.row}>
           <TextField style={styles.input} value={address} onChange={link(this, 'address')} placeholder='address' />

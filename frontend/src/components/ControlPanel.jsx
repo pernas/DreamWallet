@@ -5,22 +5,30 @@ import RaisedButton from 'material-ui/RaisedButton'
 import * as actions from '../actions'
 import * as WalletActions from 'dream-wallet/lib/actions'
 import Login from './panels/Login'
+import TransactionsPanel from './panels/TransactionsPanel'
 import Test from './panels/Test'
 
 const styles = {
   panel: {
     flex: 2,
+    height: '100%',
     padding: 16,
-    marginLeft: 32
+    marginLeft: 32,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden'
   },
   header: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flexShrink: 0,
     paddingBottom: 16,
     borderBottom: '1px solid #ddd'
   },
   controls: {
+    flex: 1,
+    overflow: 'hidden',
     marginTop: 16
   },
   panelButton: {
@@ -33,6 +41,7 @@ let connectPanel = connect((state) => state, combinedActions)
 
 const panels = ({
   'login': connectPanel(Login),
+  'txs': connectPanel(TransactionsPanel),
   'test': connectPanel(Test)
 })
 
@@ -43,8 +52,9 @@ const PanelButton = ({ active, forPanel: p, onClick }) => (
 const PanelHeader = ({ active, onChangePanel }) => (
   <div style={styles.header}>
     <div>
-      <PanelButton forPanel='login' active={active} onClick={onChangePanel} />
-      <PanelButton forPanel='test' active={active} onClick={onChangePanel} />
+      {Object.keys(panels).map(p => (
+        <PanelButton key={p} forPanel={p} active={active} onClick={onChangePanel} />
+      ))}
     </div>
     <img src='/public/img/blockchain.png' height={32} />
   </div>

@@ -11,6 +11,11 @@
   ],
   "author": "",
   "license": "MIT",
+  "standard": {
+    "global": [
+      "fetch"
+    ]
+  },
   "devDependencies": {
     "babel-cli": "^6.16.0",
     "babel-core": "^6.0.20",
@@ -56,6 +61,7 @@
     "react-router": "^3.0.2",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0",
+    "redux-localstorage": "^0.4.1",
     "redux-promise": "^0.5.3",
     "redux-saga": "^0.13.0",
     "redux-thunk": "^2.2.0",
