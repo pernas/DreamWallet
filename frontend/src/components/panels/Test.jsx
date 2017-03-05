@@ -45,7 +45,8 @@ class Test extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      password: 'weakPassword',
+      password: '',
+      mainPassword: '',
       address: '',
       label: ''
     }
@@ -78,20 +79,23 @@ class Test extends Component {
 
   render () {
     const { addAddress, clearWallet, addLabel, changeMainPassword } = this.props
-    const { password, address, label } = this.state
+    const { password, address, label, mainPassword } = this.state
     return (
       <div>
         <h2>Test Component</h2>
         <div style={styles.row}>
-          <TextField name='password' style={styles.input} value={password} onChange={link(this, 'password')} placeholder='password' />
-          <RaisedButton style={styles.rowButton} primary label='password on' onClick={this.activate.bind(this, password)} />
-          <RaisedButton style={styles.rowButton} secondary label='password off' onClick={this.deactivate.bind(this, password)} />
-          <RaisedButton style={styles.rowButton} primary label='main password change' onClick={() => changeMainPassword(password)} />
-        </div>
-        <div style={styles.row}>
           <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />
           <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random(), password)} />
           <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly(), password)} />
+        </div>
+        <div style={styles.row}>
+          <TextField name='password' style={styles.input} value={password} onChange={link(this, 'password')} placeholder='second password' />
+          <RaisedButton style={styles.rowButton} primary label='password on' onClick={this.activate.bind(this, password)} />
+          <RaisedButton style={styles.rowButton} secondary label='password off' onClick={this.deactivate.bind(this, password)} />
+        </div>
+        <div style={styles.row}>
+          <TextField name='mainPassword' style={styles.input} value={mainPassword} onChange={link(this, 'mainPassword')} placeholder='wallet password' />
+          <RaisedButton style={styles.rowButton} primary label='set new password' onClick={() => changeMainPassword(mainPassword)} />
         </div>
         <div style={styles.row}>
           <TextField name='address' style={styles.input} value={address} onChange={link(this, 'address')} placeholder='address' />

@@ -18,7 +18,7 @@ const configureStore = () => {
     compose(
       persistState('session'),
       applyMiddleware(
-        // walletSyncMiddleware({ api, path: 'wallet' }),
+        // walletSyncMiddleware({ api, path: 'wallets' }),
         // walletSocketMiddleware({ socket }),
         sagaMiddleware,
         // blockchainDataMiddleware({ api }),
