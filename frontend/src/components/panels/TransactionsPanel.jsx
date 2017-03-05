@@ -8,7 +8,10 @@ let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 class TransactionsPanel extends Component {
   constructor (props) {
     super(props)
-    let addr = '1Lu1ejJQrEHiuzNi5Ud789m6x4XgkAk5Qh'
+    // this should be a selector
+    const addr = this.props.wallets[this.props.selected].get('wallet').get('hd_wallets').first()
+                 ? this.props.wallets[this.props.selected].get('wallet').get('hd_wallets').first().get('accounts').first().get('xpub')
+                 : ""
     this.state = { addr }
   }
 

@@ -9,12 +9,16 @@ import * as A from '../actions'
 export const rootSaga = api => {
   // this should return an object with all the sagas and the api in the clojure
   // so you can decide which sagas you want to run
-  const walletLoadSaga = function* (action) {
-    const wallet = action.payload.get('wallet')
-    const context = getWalletContext(wallet)
-    // we can handle api errors here
-    const data = yield call(api.fetchBlockchainData, context, { n: 0 })
-    yield put(A.loadWalletData(data))
+  const walletDataLoadSaga = function* (action) {
+    try {
+      const wallet = action.payload.get('wallet')
+      const context = getWalletContext(wallet)
+      // we can handle api errors here
+      const data = yield call(api.fetchBlockchainData, context, { n: 0 })
+      yield put(A.loadWalletData(data))
+    } catch (error) {
+      // probably there is no context (blank wallet)
+    }
   }
 
   const txsLoadRequestSaga = function* (action) {
@@ -29,11 +33,24 @@ export const rootSaga = api => {
 
   }
 
+  const multiWalletSaga = function* (action) {
+    const wrappedAction = action.payload.action
+    switch (wrappedAction.type) {
+      case A.WALLET_DATA_REQUEST:
+        yield call(walletDataLoadSaga, wrappedAction);
+        break
+      case A.TXS_LOAD_REQUEST:
+        yield call(txsLoadRequestSaga, wrappedAction);
+        break
+    }
+  }
+
   return function* () {
-    yield takeEvery(A.WALLET_LOAD, walletLoadSaga)
+    yield takeEvery(A.WALLET_DATA_REQUEST, walletDataLoadSaga)
     // this is currently broken because WALLET_LOAD is wrapped in MULTI_WALLET_DISPATCH
     // fix by having multiWalletReducer handle blockchain data as well?
     yield takeEvery(A.TXS_LOAD_REQUEST, txsLoadRequestSaga)
+    yield takeEvery(A.MULTI_WALLET_DISPATCH, multiWalletSaga)
   }
 }
 

@@ -8,6 +8,7 @@ export const SECOND_PASSWORD_ON = '@v3.SECOND_PASSWORD_ON'
 export const SECOND_PASSWORD_OFF = '@v3.SECOND_PASSWORD_OFF'
 export const MAIN_PASSWORD_CHANGE = '@v3.MAIN_PASSWORD_CHANGE'
 export const PAYLOAD_CHECKSUM_CHANGE = '@v3.PAYLOAD_CHECKSUM_CHANGE'
+export const WALLET_DATA_REQUEST = '@v3.WALLET_DATA_REQUEST'
 export const WALLET_DATA_LOAD = '@v3.WALLET_DATA_LOAD'
 export const CONTEXT_TXS_LOAD = '@v3.CONTEXT_TXS_LOAD'
 export const TXS_LOAD_REQUEST = '@v3.TXS_LOAD_REQUEST'
@@ -33,6 +34,8 @@ export const changePayloadChecksum = (checksum) =>
   ({ type: PAYLOAD_CHECKSUM_CHANGE, payload: checksum })
 export const loadWalletData = (data) =>
   ({ type: WALLET_DATA_LOAD, payload: data })
+export const requestWalletData = (wallet) =>
+  ({ type: WALLET_DATA_REQUEST, payload: wallet })
 export const loadContextTxs = (data) =>
   ({ type: CONTEXT_TXS_LOAD, payload: data })
 export const requestTxs = (context) =>
