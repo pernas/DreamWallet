@@ -4,12 +4,13 @@ import transactions from './transactions'
 import status from './status'
 import { multiWalletReducer, blockchainDataReducer } from 'dream-wallet/lib/reducers'
 import { SAVE_SESSION, SELECTION_SET } from '../actions'
+import { merge } from 'ramda'
 
-const session = (state = '', action) => {
+const session = (state = {}, action) => {
   let { type } = action
   switch (type) {
     case SAVE_SESSION: {
-      return action.payload
+      return merge(state, action.payload)
     }
     default:
       return state

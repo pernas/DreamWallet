@@ -17,15 +17,32 @@ const createWalletApi = ({rootUrl, apiUrl, apiCode} = {}, returnType) => {
   const promiseToTask = futurizeP(Task)
   const future = returnType ? futurizeP(returnType) : identity
 
+  const decrypt = (password) => (response) => response
+    .map(over(lensProp('payload'), JSON.parse))
+    .map(WCrypto.decryptPayload(password))
+    .chain(eitherToTask)
+    .map(over(lensProp('wallet'), Wallet))
+    .map(Map)
+
   const getWalletTask = (guid, sharedKey, password) =>
-    promiseToTask(ApiPromise.fetchWalletWithSharedKey)(guid, sharedKey)
-      .map(over(lensProp('payload'), JSON.parse))
-      .map(WCrypto.decryptPayload(password))
-      .chain(eitherToTask)
-      .map(over(lensProp('wallet'), Wallet))
-      .map(Map)
+    decrypt(password)(promiseToTask(ApiPromise.fetchWalletWithSharedKey)(guid, sharedKey))
 
   const getWallet = compose(taskToPromise, getWalletTask)
+
+  const fetchWalletTask = (guid, session, password) =>
+    decrypt(password)(promiseToTask(ApiPromise.fetchWalletWithSession)(guid, session))
+
+  const fetchWallet = compose(taskToPromise, fetchWalletTask)
+
+  const downloadWallet = (guid, sharedKey, session, password) => {
+    if (sharedKey) {
+      return getWallet(guid, sharedKey, password)
+    }
+    if (session) {
+      return fetchWallet(guid, session, password)
+    }
+    return Promise.reject('MISSING_CREDENTIALS')
+  }
 
   const saveWalletTask = (state) =>
     promiseToTask(ApiPromise.saveWallet)(WCrypto.encryptState(state))
@@ -36,9 +53,12 @@ const createWalletApi = ({rootUrl, apiUrl, apiCode} = {}, returnType) => {
   // export const get = compose(taskToPromise, getTask)
   const Api = map(future, ApiPromise)
 
+  // TODO :: we should rename or unify get,fetch,download functions
   return {
     ...Api,
     getWallet: future(getWallet),
+    fetchWallet: future(fetchWallet),
+    downloadWallet: future(downloadWallet),
     saveWallet: future(saveWallet)
   }
 }

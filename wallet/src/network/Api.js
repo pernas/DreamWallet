@@ -77,7 +77,7 @@ const createApi = ({
   }
 
   // fetchWallet :: (String) -> Promise JSON
-  const fetchWallet = (guid, sessionToken) => {
+  const fetchWalletWithSession = (guid, sessionToken) => {
     var headers = { sessionToken }
     var data = { format: 'json', resend_code: null };
     return request('GET', 'wallet/' + guid, data, headers)
@@ -99,7 +99,7 @@ const createApi = ({
   const obtainSessionToken = () => {
     var processResult = function (data) {
       if (!data.token || !data.token.length) {
-        return Promise.reject('Invalid session token');
+        return Promise.reject('INVALID_SESSION_TOKEN');
       }
       return data.token;
     };
@@ -115,10 +115,9 @@ const createApi = ({
   }
 
   const pollForSessioGUID = sessionToken => {
-    const p = x => {console.log(x); return x}
     var data = { format: 'json' }
     var headers = { sessionToken }
-    request('GET', 'wallet/poll-for-session-guid', data, headers).then(p)
+    return request('GET', 'wallet/poll-for-session-guid', data, headers)
   }
 
   return {
@@ -128,7 +127,7 @@ const createApi = ({
     obtainSessionToken: future(obtainSessionToken),
     establishSession: future(establishSession),
     pollForSessioGUID: future(pollForSessioGUID),
-    fetchWallet: future(fetchWallet)
+    fetchWalletWithSession: future(fetchWalletWithSession)
   }
 }
 
