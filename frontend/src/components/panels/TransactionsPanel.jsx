@@ -24,6 +24,7 @@ class TransactionsPanel extends Component {
       <div>
         <h2>Txs Component</h2>
         <TextField
+          name='address'
           disabled
           value={addr}
           style={{ width: 360, marginRight: 32 }}

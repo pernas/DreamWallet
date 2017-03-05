@@ -8,5 +8,7 @@ export const getWalletContext = (wallet) => flatten([
   map(prop('xpub'), view(compose(hdwallets, iLensProp(0), accounts), wallet).toJS())
 ])
 
-export const getTransactions = context => state =>
-  state.blockchainData.addressesInfo.get(context).transactions
+export const getTransactions = context => state => {
+  let info = state.blockchainData.addressesInfo.get(context)
+  return info ? info.transactions : []
+}

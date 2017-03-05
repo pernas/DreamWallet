@@ -59,14 +59,16 @@ class Test extends Component {
   // second password: adeu
 
   activate (pwd) {
-    Immutable.WalletUtils.encrypt(pwd, this.props.wallet.get('wallet'))
+    let { wallets, selected } = this.props
+    Immutable.WalletUtils.encrypt(pwd, wallets[selected].get('wallet'))
       .map(this.props.secondPasswordOn)
       // this action maybe it is not accurate (this might happen
       // if an exception is launched inside encryption)
       .orElse(this.props.inconsistentWalletStateError)
   }
   deactivate (pwd) {
-    const wallet = this.props.wallet.get('wallet')
+    let { wallets, selected } = this.props
+    const wallet = wallets[selected].get('wallet')
     Immutable.WalletUtils.isValidSecondPwd(pwd, wallet)
       ? Immutable.WalletUtils.decrypt(pwd, wallet)
         .map(this.props.secondPasswordOff)
@@ -81,7 +83,7 @@ class Test extends Component {
       <div>
         <h2>Test Component</h2>
         <div style={styles.row}>
-          <TextField style={styles.input} value={password} onChange={link(this, 'password')} placeholder='password' />
+          <TextField name='password' style={styles.input} value={password} onChange={link(this, 'password')} placeholder='password' />
           <RaisedButton style={styles.rowButton} primary label='password on' onClick={this.activate.bind(this, password)} />
           <RaisedButton style={styles.rowButton} secondary label='password off' onClick={this.deactivate.bind(this, password)} />
           <RaisedButton style={styles.rowButton} primary label='main password change' onClick={() => changeMainPassword(password)} />
@@ -93,8 +95,8 @@ class Test extends Component {
           <RaisedButton style={styles.rowButton} primary label='save session' onClick={() => saveSession(password)} />
         </div>
         <div style={styles.row}>
-          <TextField style={styles.input} value={address} onChange={link(this, 'address')} placeholder='address' />
-          <TextField style={styles.input} value={label} onChange={link(this, 'label')} placeholder='label' />
+          <TextField name='address' style={styles.input} value={address} onChange={link(this, 'address')} placeholder='address' />
+          <TextField name='label' style={styles.input} value={label} onChange={link(this, 'label')} placeholder='label' />
           <RaisedButton style={styles.rowButton} primary label='Label' onClick={() => addLabel(address, label)} />
         </div>
 

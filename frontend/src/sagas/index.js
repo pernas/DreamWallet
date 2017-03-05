@@ -4,7 +4,7 @@ import { call, put, select, fork } from 'redux-saga/effects'
 import * as WalletSagas from 'dream-wallet/lib/sagas'
 // import { getWalletContext, getTransactions } from '../selectors'
 import * as actions from '../actions'
-import { getSession } from '../selectors'
+import { getSession, getSelection } from '../selectors'
 import * as walletActions from 'dream-wallet/lib/actions'
 import { prop } from 'ramda'
 
@@ -46,7 +46,8 @@ export const rootSaga = api => {
     if (c.sharedKey) {
       try {
         const wallet = yield call(api.getWallet, c.guid, c.sharedKey, c.password)
-        yield put(walletActions.loadWallet(wallet))
+        const selection = yield select(getSelection)
+        yield put(walletActions.dispatchMultiWallet(selection, walletActions.loadWallet(wallet)))
         yield put(actions.loginSuccess())
       } catch (error) {
         yield put(actions.loginError(error))
