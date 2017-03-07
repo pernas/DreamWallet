@@ -57,17 +57,12 @@ class ControlPanel extends Component {
     this.state = { panel: 'login' }
   }
   render () {
-    let { selected } = this.props
     let { panel } = this.state
-
-    let { requestTxs, clearTxs } = WalletActions
-    let enhancedActions = WalletActions.enhanceActionCreatorsForMulti(selected, WalletActions)
-    let combinedActions = { ...enhancedActions, ...{ requestTxs, clearTxs }, ...actions }
+    let combinedActions = {...WalletActions, ...actions }
     let connectPanel = connect((state) => state, combinedActions)
 
     const panels = ({
       'login': connectPanel(Login),
-      'login2': connectPanel(Login),
       'txs': connectPanel(TransactionsPanel),
       'test': connectPanel(Test)
     })
@@ -76,7 +71,7 @@ class ControlPanel extends Component {
     return (
       <Paper style={styles.panel} zDepth={3}>
         <PanelHeader active={panel} panels={panels} onChangePanel={(panel) => this.setState({ panel })} />
-        <div style={styles.controls}>{SelectedPanel ? <SelectedPanel panel={panel} selected={selected} /> : null}</div>
+        <div style={styles.controls}>{SelectedPanel ? <SelectedPanel panel={panel} /> : null}</div>
       </Paper>
     )
   }

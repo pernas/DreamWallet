@@ -9,8 +9,8 @@ class TransactionsPanel extends Component {
   constructor (props) {
     super(props)
     // this should be a selector
-    const addr = this.props.wallets[this.props.selected].get('wallet').get('hd_wallets').first()
-                 ? this.props.wallets[this.props.selected].get('wallet').get('hd_wallets').first().get('accounts').first().get('xpub')
+    const addr = this.props.wallet.get('wallet').get('hd_wallets').first()
+                 ? this.props.wallet.get('wallet').get('hd_wallets').first().get('accounts').first().get('xpub')
                  : ""
     this.state = { addr }
   }

@@ -60,16 +60,14 @@ class Test extends Component {
   // second password: adeu
 
   activate (pwd) {
-    let { wallets, selected } = this.props
-    Immutable.WalletUtils.encrypt(pwd, wallets[selected].get('wallet'))
+    Immutable.WalletUtils.encrypt(pwd, this.props.wallet.get('wallet'))
       .map(this.props.secondPasswordOn)
       // this action maybe it is not accurate (this might happen
       // if an exception is launched inside encryption)
       .orElse(this.props.inconsistentWalletStateError)
   }
   deactivate (pwd) {
-    let { wallets, selected } = this.props
-    const wallet = wallets[selected].get('wallet')
+    const wallet = this.props.wallet.get('wallet')
     Immutable.WalletUtils.isValidSecondPwd(pwd, wallet)
       ? Immutable.WalletUtils.decrypt(pwd, wallet)
         .map(this.props.secondPasswordOff)

@@ -4,7 +4,7 @@ import { call, put, select, fork } from 'redux-saga/effects'
 import * as WalletSagas from 'dream-wallet/lib/sagas'
 // import { getWalletContext, getTransactions } from '../selectors'
 import * as actions from '../actions'
-import { getSession, getSelection, getSelectedWallet } from '../selectors'
+import { getSession, getWallet } from '../selectors'
 import * as walletActions from 'dream-wallet/lib/actions'
 import { prop, assoc } from 'ramda'
 
@@ -42,8 +42,7 @@ export const rootSaga = api => {
   const fetchWalletSaga = function* (guid, sharedKey, session, password) {
     try {
       let wallet = yield call(api.downloadWallet, guid, sharedKey, session, password)
-      let selection = yield select(getSelection)
-      yield put(walletActions.dispatchMultiWallet(selection, walletActions.loadWallet(wallet)))
+      yield put(walletActions.loadWallet(wallet))
       yield put(walletActions.requestWalletData(wallet))
       yield put(actions.loginSuccess())
     } catch (error) {
@@ -73,10 +72,10 @@ export const rootSaga = api => {
     }
   }
 
-  const changeWalletSaga = function* (action) {
-    const wallet = yield select(getSelectedWallet)
-    yield put(walletActions.requestWalletData(wallet))
-  }
+  // const changeWalletSaga = function* (action) {
+  //   const wallet = yield select(getWallet)
+  //   yield put(walletActions.requestWalletData(wallet))
+  // }
 
   return function* () {
     yield [
@@ -84,7 +83,7 @@ export const rootSaga = api => {
       fork(WalletSagas.rootSaga(api))
     ];
     yield takeEvery(actions.LOGIN_START, loginSaga)
-    yield takeEvery(actions.SELECTION_SET, changeWalletSaga)
+    // yield takeEvery(actions.SELECTION_SET, changeWalletSaga)
     // yield takeEvery(actions.LOGIN_START, pollData)
   }
 }
