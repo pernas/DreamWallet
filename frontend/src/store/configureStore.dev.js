@@ -5,7 +5,6 @@ import createSagaMiddleware from 'redux-saga'
 import { rootSaga } from '../sagas'
 import persistState from 'redux-localstorage'
 import Immutable from 'immutable-ext'
-import { composeWithDevTools } from 'redux-devtools-extension';
 // import { Socket } from 'dream-wallet/lib/network'
 import { walletSyncMiddleware, walletSocketMiddleware } from 'dream-wallet/lib/middleware'
 import { createWalletApi } from 'dream-wallet/lib/network'
