@@ -4,31 +4,37 @@ import reducers from '../reducers'
 import createSagaMiddleware from 'redux-saga'
 import { rootSaga } from '../sagas'
 import persistState from 'redux-localstorage'
-
+import Immutable from 'immutable-ext'
+import { composeWithDevTools } from 'redux-devtools-extension';
 // import { Socket } from 'dream-wallet/lib/network'
-import { blockchainDataMiddleware, walletSyncMiddleware, walletSocketMiddleware } from 'dream-wallet/lib/middleware'
+import { walletSyncMiddleware, walletSocketMiddleware } from 'dream-wallet/lib/middleware'
 import { createWalletApi } from 'dream-wallet/lib/network'
+import * as C from '../config'
 
 const configureStore = () => {
   // const socket = new Socket()
-  const api = createWalletApi()
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__(
+    { serialize: { immutable: Immutable } }) || compose
+  const api = createWalletApi({ rootUrl: C.ROOT_URL
+                              , apiUrl: C.API_BLOCKCHAIN_INFO
+                              , apiCode: C.API_CODE})
   const sagaMiddleware = createSagaMiddleware()
   const store = createStore(
-    reducers,
-    compose(
+    reducers({wpath: C.WALLET_IMMUTABLE_PATH, dpath: C.BLOCKCHAIN_DATA_PATH}),
+    composeEnhancers(
       persistState('session'),
       applyMiddleware(
-        // walletSyncMiddleware({ api, path: 'wallets' }),
+        walletSyncMiddleware({ api: api, wpath: C.WALLET_IMMUTABLE_PATH}),
         // walletSocketMiddleware({ socket }),
         sagaMiddleware,
-        // blockchainDataMiddleware({ api }),
         createLogger()
-      ),
-      window.devToolsExtension ? window.devToolsExtension() : f => f
+      )
     )
   )
 
-  sagaMiddleware.run(rootSaga(api))
+  sagaMiddleware.run(rootSaga({ api: api
+                              , wpath: C.WALLET_IMMUTABLE_PATH
+                              , dpath: C.BLOCKCHAIN_DATA_PATH}))
 
   return {
     ...store

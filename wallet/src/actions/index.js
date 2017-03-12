@@ -13,8 +13,9 @@ export const WALLET_DATA_LOAD = '@v3.WALLET_DATA_LOAD'
 export const CONTEXT_TXS_LOAD = '@v3.CONTEXT_TXS_LOAD'
 export const TXS_LOAD_REQUEST = '@v3.TXS_LOAD_REQUEST'
 export const CONTEXT_TXS_CLEAR = '@v3.CONTEXT_TXS_CLEAR'
-export const MULTI_WALLET_DISPATCH = '@v3.MULTI_WALLET_DISPATCH'
-export const MULTI_WALLET_NEW = '@v3.MULTI_WALLET_NEW'
+export const SYNC_START = '@v3.SYNC_START'
+export const SYNC_SUCCESS = '@v3.SYNC_SUCCESS'
+export const SYNC_ERROR = '@v3.SYNC_ERROR'
 
 export const addAddress = (address, secondPassword) =>
   ({ type: ADDRESS_ADD, payload: {address, secondPassword} })
@@ -34,19 +35,17 @@ export const changePayloadChecksum = (checksum) =>
   ({ type: PAYLOAD_CHECKSUM_CHANGE, payload: checksum })
 export const loadWalletData = (data) =>
   ({ type: WALLET_DATA_LOAD, payload: data })
-export const requestWalletData = (wallet) =>
-  ({ type: WALLET_DATA_REQUEST, payload: wallet })
+export const requestWalletData = (walletContext) =>
+  ({ type: WALLET_DATA_REQUEST, payload: walletContext })
 export const loadContextTxs = (data) =>
   ({ type: CONTEXT_TXS_LOAD, payload: data })
 export const requestTxs = (context) =>
   ({ type: TXS_LOAD_REQUEST, payload: context })
 export const clearTxs = (context) =>
   ({ type: CONTEXT_TXS_CLEAR, payload: context })
-export const dispatchMultiWallet = (index, action) =>
-  ({ type: MULTI_WALLET_DISPATCH, payload: { index, action } })
-export const newMultiWallet = () =>
-  ({ type: MULTI_WALLET_NEW })
-
-export const enhanceActionCreatorsForMulti = (index, actionCreators) => (
-  mapObjIndexed((a) => (...args) => dispatchMultiWallet(index, a(...args)), actionCreators)
-)
+export const syncStart = () =>
+  ({ type: SYNC_START })
+export const syncSuccess = (checksum) =>
+  ({ type: SYNC_SUCCESS, payload: checksum })
+export const syncError = (error) =>
+  ({ type: SYNC_ERROR, payload: error, error: true })

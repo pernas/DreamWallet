@@ -5,7 +5,6 @@ import * as U from './utils'
 import { curry, compose, identity, repeat, reduceRight, lensProp, assoc, dissoc, over, view } from 'ramda'
 import { traverseOf } from 'ramda-lens'
 import Either from 'data.either'
-import { fromJS } from 'immutable'
 import { WalletUtils } from '../immutable'
 import * as Lens from '../lens'
 
@@ -47,14 +46,14 @@ export const decryptPayload = password => payload => {
   return traverseOf(plens, Either.of, decryptWallet(password), payload)
          .map(o => assoc('version', ver, o))
          .map(o => assoc('pbkdf2_iterations', iter, o))
-         .map(o => assoc('wallet', o.payload, o))
+         .map(o => assoc('walletImmutable', o.payload, o))
          .map(o => dissoc('payload', o))
          .map(o => assoc('password', password, o))
 }
 
 // encryptState :: State -> JSON
 export const encryptState = state => {
-  const json = WalletUtils.toJS(state.get('wallet'));
+  const json = WalletUtils.toJS(state.get('walletImmutable'));
   const serialized = JSON.stringify(json);
   const iterations = view(Lens.pbkdf2Iterations, state)
   const password = view(Lens.password, state)

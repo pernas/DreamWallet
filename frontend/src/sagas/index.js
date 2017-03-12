@@ -2,12 +2,12 @@
 import { takeEvery } from 'redux-saga'
 import { call, put, select, fork } from 'redux-saga/effects'
 import * as WalletSagas from 'dream-wallet/lib/sagas'
-// import { getWalletContext, getTransactions } from '../selectors'
 import * as actions from '../actions'
 import { getSession, getWallet } from '../selectors'
 import * as walletActions from 'dream-wallet/lib/actions'
-import { prop, assoc } from 'ramda'
-
+import { getWalletContext } from 'dream-wallet/lib/selectors'
+import * as Lens from 'dream-wallet/lib/lens'
+import { view, prop, assoc, compose } from 'ramda'
 import Promise from 'es6-promise'
 Promise.polyfill()
 
@@ -18,7 +18,7 @@ const delay = ms => {
 }
 
 // api should be promified api (no task for saga)
-export const rootSaga = api => {
+export const rootSaga = ({ dpath, wpath, api } = {}) => {
   const pollingSaga = function* (session) {
     let rounds = 50
     while(true) {
@@ -43,7 +43,7 @@ export const rootSaga = api => {
     try {
       let wallet = yield call(api.downloadWallet, guid, sharedKey, session, password)
       yield put(walletActions.loadWallet(wallet))
-      yield put(walletActions.requestWalletData(wallet))
+      yield put(walletActions.requestWalletData(getWalletContext(wallet).toJS()))
       yield put(actions.loginSuccess())
     } catch (error) {
       if (prop('authorization_required', error)) {
@@ -54,7 +54,6 @@ export const rootSaga = api => {
       } else {
         yield put(actions.loginError(error))
       }
-
     }
   }
 
@@ -72,18 +71,11 @@ export const rootSaga = api => {
     }
   }
 
-  // const changeWalletSaga = function* (action) {
-  //   const wallet = yield select(getWallet)
-  //   yield put(walletActions.requestWalletData(wallet))
-  // }
-
   return function* () {
     yield [
       // here you can put an array of sagas in forks
-      fork(WalletSagas.rootSaga(api))
+      fork(WalletSagas.rootSaga({api, dpath, wpath}))
     ];
     yield takeEvery(actions.LOGIN_START, loginSaga)
-    // yield takeEvery(actions.SELECTION_SET, changeWalletSaga)
-    // yield takeEvery(actions.LOGIN_START, pollData)
   }
 }

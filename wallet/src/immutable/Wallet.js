@@ -1,51 +1,42 @@
-import { Record, List, Map, OrderedMap } from 'immutable-ext'
+import { Map, fromJS as IfromJS } from 'immutable-ext'
 import Either from 'data.either'
-import Address from './Address'
-import * as Addr from './Address'
-import Options from './Options'
-import HDWallet from './HDWallet'
-import * as HD from './HDWallet'
 import { compose, map ,over, view, curry } from 'ramda'
 import { iso, mapped, traversed, traverseOf } from 'ramda-lens'
 import * as Lens from '../lens'
 import { encryptSecPass, decryptSecPass, hashNTimes } from '../WalletCrypto'
 
-const WalletType = Record({
-  guid: '',
-  sharedKey: '',
-  double_encryption: false,
-  dpasswordhash: null,
-  address_book: List(),
-  keys: OrderedMap(),
-  hd_wallets: List(),
-  options: OrderedMap()
-})
-
-// /////////////////////////////////////////////////////////////////////////////
-// Wallet Constructor
-const WalletCons = (o) => new WalletType(o)
-const addressMapCons = as => Map(as.map(a => [a.addr, Address(a)]))
+const addressMapCons = as => Map(as.map(a => [a.get('addr'), a]))
 const addresses = over(Lens.addresses, addressMapCons)
-const options = over(Lens.options, Options)
-const hdwallets = over(Lens.hdwallets, compose(map(HDWallet), List))
-const addressBook = over(Lens.addressBook, List)
-const Wallet = compose(addressBook, hdwallets, addresses, options, WalletCons)
 
-// /////////////////////////////////////////////////////////////////////////////
-// To JS support
-const labelsToList = over(Lens.hdwallets, map(HD.labelsToList))
+const renameKeys = (o) => {
+  o.addresses = o.keys;
+  delete o.keys;
+  return o;
+}
+
+const renameAddresses = (o) => {
+  o.keys = o.addresses;
+  delete o.addresses;
+  return o;
+}
+
+const Wallet = compose(addresses, IfromJS, renameKeys)
+
+// // /////////////////////////////////////////////////////////////////////////////
+// // To JS support
+// const labelsToList = over(Lens.hdwallets, map(HD.labelsToList))
 const addressesToList = over(Lens.addresses, m => m.toList())
-export const toJS = compose((w) => w.toJS() ,addressesToList, labelsToList)
+// export const toJS = compose(renameAddresses, (w) => w.toJS() ,addressesToList, labelsToList)
+export const toJS = compose(renameAddresses, (w) => w.toJS() ,addressesToList)
 export const fromJS = Wallet
-// more info about the isomorphism can be found here:
-// https://medium.com/@drboolean/lenses-with-immutable-js-9bda85674780#.s591lzg5v
-
-export const wIso = iso(toJS, fromJS)
-// view(wIso, w) :: wallet in pure js (can be used as a lens)
-// With over can be used to apply myFunction acting over pure javascript
-// and returning the immutable structure
-// over(wIso, myFunction, immWallet)
-
+// // more info about the isomorphism can be found here:
+// // https://medium.com/@drboolean/lenses-with-immutable-js-9bda85674780#.s591lzg5v
+//
+// export const wIso = iso(toJS, fromJS)
+// // view(wIso, w) :: wallet in pure js (can be used as a lens)
+// // With over can be used to apply myFunction acting over pure javascript
+// // and returning the immutable structure
+// // over(wIso, myFunction, immWallet)
 
 // /////////////////////////////////////////////////////////////////////////////
 // second password support
@@ -110,6 +101,15 @@ export const isValidSecondPwd = curry((password, wallet) => {
     return false
   }
 })
+
+
+// AddrEncrypt :: Number -> String -> String -> Address -> Address
+const AddrEncrypt = curry((iterations, sharedKey, password, address) => {
+  const cipher = encryptSecPass(sharedKey, iterations, password)
+  return over(Lens.priv, cipher, address)
+})
+
+
 // /////////////////////////////////////////////////////////////////////////////
 // add address (encrypted if needed)
 // addAddress :: Wallet -> Address -> String -> Wallet
@@ -121,7 +121,7 @@ export const addAddress = curry((wallet, address, password) => {
     return append(address)
   } else {
     if (isValidSecondPwd(password, wallet)) {
-      return append(Addr.encrypt(it, sk, password, address))
+      return append(AddrEncrypt(it, sk, password, address))
     } else {
       throw new Error('INVALID_SECOND_PASSWORD')
     }

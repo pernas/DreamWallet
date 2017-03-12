@@ -1,14 +1,24 @@
 
 import { view, compose, prop, map, flatten } from 'ramda'
-import { addresses, hdwallets, accounts, iLensProp } from '../lens'
+import { mapped } from 'ramda-lens'
+import * as Lens from '../lens'
+import { Map, List } from 'immutable-ext'
 
-// NOTE: this can definitely be improved
-export const getWalletContext = (wallet) => flatten([
-  map(prop('addr'), view(addresses, wallet).toList().toJS()),
-  map(prop('xpub'), view(compose(hdwallets, iLensProp(0), accounts), wallet).toJS())
-])
+// _xpubs :: [account] -> [xpub]
+const _xpubs = as => view(compose(mapped, Lens.xpub), as)
+// _accounts :: [hdwallet] -> [account]
+const _accounts = hs => view(compose(mapped, Lens.accounts), hs).fold()
+// _addresses :: {keys} -> [addresses]
+const _addresses = ks => ks.keySeq().toList()
 
-export const getTransactions = context => state => {
-  let info = state.blockchainData.addressesInfo.get(context)
-  return info ? info.transactions : []
+export const getXpubs = compose(_xpubs, _accounts, view(Lens.hdwallets), view(Lens.walletImmutable))
+export const getAddresses = compose(_addresses, view(Lens.addresses), view(Lens.walletImmutable))
+export const getWalletContext = w => List([getXpubs(w), getAddresses(w)]).fold()
+
+export const getWallet = payload => payload.get('walletImmutable')
+export const isDoubleEncrypted = wallet => wallet.get('double_encryption')
+
+export const getTransactions = dpath => context => state => {
+  let info = state[dpath].get('addressesInfo').get(context)
+  return info ? info.get('transactions') : List([])
 }

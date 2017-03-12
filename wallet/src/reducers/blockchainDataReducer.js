@@ -1,10 +1,14 @@
-import { List, OrderedMap } from 'immutable'
-import { set, over } from 'ramda'
+import { Map, List, OrderedMap, fromJS } from 'immutable-ext'
+import { set, over, map, assoc } from 'ramda'
 import { iLensPath } from '../lens'
-import { Data, WalletInfo, Info, Block, AddressInfo, Tx } from '../immutable'
 import { WALLET_CLEAR, WALLET_DATA_LOAD, CONTEXT_TXS_LOAD, CONTEXT_TXS_CLEAR } from '../actions'
 
-const INITIAL_STATE = Data()
+const INITIAL_OBJECT = {
+  info: {latest_block: {}},
+  walletInfo: {},
+  addressesInfo: {}
+}
+const INITIAL_STATE = fromJS(INITIAL_OBJECT)
 
 let makeTxsLens = (context) => iLensPath(['addressesInfo', context, 'transactions'])
 
@@ -13,17 +17,18 @@ const blockchainDataReducer = (state = INITIAL_STATE, action) => {
   switch (type) {
     case WALLET_DATA_LOAD: {
       let { payload } = action
-      // NOTE: more of this setting should be handled by the data structures themselves
-      state = state.set('info', Info({ latest_block: Block(payload.info.latest_block) }))
-      state = state.set('walletInfo', WalletInfo(payload.wallet))
-      let as = OrderedMap(payload.addresses.map(AddressInfo).map(a => [a.address, a]))
-      state = state.set('addressesInfo', as)
-      return state
+      const object = {
+        info: { latest_block: payload.info.latest_block },
+        walletInfo: payload.wallet,
+      }
+      const io = fromJS(object)
+      const am = Map(map(a => [a.address, fromJS(assoc('transactions', [], a))], payload.addresses))
+      return io.set('addressesInfo', am)
     }
     case CONTEXT_TXS_LOAD: {
       // NOTE: how to handle txs for groups (all legacy addresses)? selector?
       let { payload } = action
-      let txs = List(payload.txs.map(Tx))
+      let txs = fromJS(payload.txs)
       let txsLens = makeTxsLens(payload.addresses[0].address)
       return over(txsLens, t => t.concat(txs), state)
     }

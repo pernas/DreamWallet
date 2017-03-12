@@ -8,7 +8,7 @@ let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 const walletInfo = [
   {
     guid: 'f9df366a-3fc3-4826-827f-fb3c1e8ce616',
-    sharedKey: '00efae13-985b-4858-81ad-71bd8b5ac863',
+    // sharedKey: '00efae13-985b-4858-81ad-71bd8b5ac863',
     password: '100 cent'
   },
   {
@@ -37,7 +37,12 @@ class Login extends Component {
     let { guid, sharedKey, password } = this.state
 
     let login = () => {
-      loginStart({guid, sharedKey, password})
+      if(sharedKey) {
+        loginStart({guid, sharedKey, password})
+      } else {
+        // if we pass sharedKey: undefined to the action, then serialization of actions in redux-dev tools is failing
+        loginStart({guid, password})
+      }
     }
 
     return (

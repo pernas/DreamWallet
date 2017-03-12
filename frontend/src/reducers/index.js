@@ -1,10 +1,9 @@
 import { combineReducers } from 'redux'
 import login from './login'
-import transactions from './transactions'
-import status from './status'
 import { walletReducer, blockchainDataReducer } from 'dream-wallet/lib/reducers'
-import { SAVE_SESSION } from '../actions'
+import { SAVE_SESSION, PANEL_SWITCH } from '../actions'
 import { merge } from 'ramda'
+import { reducer as formReducer } from 'redux-form'
 
 const session = (state = {}, action) => {
   let { type } = action
@@ -17,13 +16,24 @@ const session = (state = {}, action) => {
   }
 }
 
-const reducers = combineReducers({
+const panel = (state = 'login', action) => {
+  let { type, payload } = action
+  switch (type) {
+    case PANEL_SWITCH: {
+      return payload
+    }
+    default:
+      return state
+  }
+}
+
+const reducers = ({wpath, dpath}) => combineReducers({
+  panel: panel,
+  form: formReducer,
   session: session,
   loginState: login,
-  transactions,
-  status,
-  blockchainData: blockchainDataReducer,
-  wallet: walletReducer
+  [dpath]: blockchainDataReducer,
+  [wpath]: walletReducer
 })
 
 export default reducers

@@ -3,7 +3,9 @@ import { connect } from 'react-redux'
 import Paper from 'material-ui/Paper'
 import ControlPanel from './ControlPanel'
 import { Immutable } from 'dream-wallet'
-const toJS = Immutable.WalletUtils.toJS
+import { WALLET_IMMUTABLE_PATH } from '../config'
+import { getWallet } from 'dream-wallet/lib/selectors'
+import { assoc } from 'ramda'
 
 const styles = {
   wrapper: {
@@ -23,11 +25,12 @@ const styles = {
 
 class Main extends Component {
   render () {
-
+    console.log(this.props)
+    console.log(this.props[WALLET_IMMUTABLE_PATH])
     return (
       <div style={styles.wrapper}>
         <Paper style={styles.json} zDepth={3}>
-          <pre>{JSON.stringify(toJS(this.props.wallet.get('wallet')), null, 2)}</pre>
+          <pre>{JSON.stringify(getWallet(this.props[WALLET_IMMUTABLE_PATH]).toJS(), null, 2)}</pre>
         </Paper>
         <ControlPanel />
       </div>
@@ -36,7 +39,7 @@ class Main extends Component {
 }
 
 let connectMain = connect(
-  (state) => ({ wallet: state.wallet })
+  (state) => assoc(WALLET_IMMUTABLE_PATH, state[WALLET_IMMUTABLE_PATH], {})
 )
 
 export default connectMain(Main)

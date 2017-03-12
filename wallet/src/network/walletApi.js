@@ -1,6 +1,6 @@
 /* eslint-disable semi */
 import Task from 'data.task'
-import { lensProp, over, compose, map, identity } from 'ramda'
+import { assoc, dissoc, lensProp, over, compose, map, identity } from 'ramda'
 import * as WCrypto from '../WalletCrypto'
 import Promise from 'es6-promise'
 import { Wallet } from '../immutable'
@@ -21,7 +21,11 @@ const createWalletApi = ({rootUrl, apiUrl, apiCode} = {}, returnType) => {
     .map(over(lensProp('payload'), JSON.parse))
     .map(WCrypto.decryptPayload(password))
     .chain(eitherToTask)
-    .map(over(lensProp('wallet'), Wallet))
+    .map(over(lensProp('walletImmutable'), Wallet))
+    .map(dissoc('extra_seed'))
+    .map(dissoc('symbol_btc'))
+    .map(dissoc('symbol_local'))
+    .map(dissoc('guid'))
     .map(Map)
 
   const getWalletTask = (guid, sharedKey, password) =>

@@ -1,18 +1,56 @@
 import { over, append, set, compose, view } from 'ramda'
 import * as Lens from '../lens'
 import * as A from '../actions'
-import { Wallet, WalletUtils, Address } from '../immutable'
+import { Wallet, WalletUtils } from '../immutable'
 import { encryptSecPass } from '../WalletCrypto'
 import { Map } from 'immutable-ext'
 import { combineReducers } from 'redux-immutable'
 
-export const WALLET_INITIAL_STATE = Wallet()
 
-export const wallet = (state = WALLET_INITIAL_STATE, action) => {
+const emptyWallet = {
+  "tx_notes": {},
+  "guid": "",
+  "tx_names": [],
+  "double_encryption": false,
+  "address_book": [],
+  "keys": [],
+  "hd_wallets": [
+    {
+      "seed_hex": "",
+      "passphrase": "",
+      "mnemonic_verified": false,
+      "default_account_idx": 0,
+      "accounts": [
+        {
+          "label": "",
+          "archived": false,
+          "xpriv": "",
+          "xpub": "",
+          "address_labels": [],
+          "cache": {
+            "receiveAccount": "",
+            "changeAccount": ""
+          }
+        }
+      ]
+    }
+  ],
+  "sharedKey": "",
+  "options": {
+    "pbkdf2_iterations": 5000,
+    "fee_per_kb": 10000,
+    "html5_notifications": false,
+    "logout_time": 600000
+  }
+}
+
+export const WALLET_INITIAL_STATE = Wallet(emptyWallet)
+
+export const walletImmutable = (state = WALLET_INITIAL_STATE, action) => {
   const { type } = action
   switch (type) {
     case A.WALLET_LOAD: {
-      return action.payload.get('wallet')
+      return action.payload.get('walletImmutable')
     }
     case A.SECOND_PASSWORD_ON:
     case A.SECOND_PASSWORD_OFF:{
@@ -23,7 +61,7 @@ export const wallet = (state = WALLET_INITIAL_STATE, action) => {
     }
     case A.ADDRESS_ADD: {
       const {address, secondPassword} = action.payload
-      return WalletUtils.addAddress(state, Address(address), secondPassword)
+      return WalletUtils.addAddress(state, Map(address), secondPassword)
     }
     case A.ADDRESS_LABEL: {
       const {address, label} = action.payload
@@ -142,8 +180,45 @@ export const war_checksum = (state = '', action) => {
   }
 }
 
+export const auth_type = (state = 0, action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return 0
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('auth_type') || 0
+    }
+    default:
+      return state
+  }
+}
+
+export const real_auth_type = (state = 0, action) => {
+  const { type } = action
+  switch (type) {
+    case A.WALLET_CLEAR: {
+      return 0
+    }
+    case A.WALLET_LOAD: {
+      return action.payload.get('real_auth_type') || 0
+    }
+    default:
+      return state
+  }
+}
+
 const walletReducer = combineReducers({
-  wallet, pbkdf2_iterations, password, version, payload_checksum, language, sync_pubkeys, war_checksum
+  walletImmutable,
+  pbkdf2_iterations,
+  password,
+  version,
+  payload_checksum,
+  language,
+  sync_pubkeys,
+  war_checksum,
+  auth_type,
+  real_auth_type
 })
 
 export default walletReducer

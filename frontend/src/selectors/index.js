@@ -1,4 +1,4 @@
+import { WALLET_IMMUTABLE_PATH } from '../config'
+
 export const getSession = guid => state => state.session[guid]
-export const getSelection = state => state.selection
-export const getSelectedWallet = state => state.wallets[state.selection]
-export const getWallet = state => state.wallet
+export const getWallet = state => state[WALLET_IMMUTABLE_PATH]

@@ -2,24 +2,26 @@ import React, { Component } from 'react'
 import TransactionList from '../TransactionList'
 import TextField from 'material-ui/TextField'
 import RaisedButton from 'material-ui/RaisedButton'
+import { getXpubs } from 'dream-wallet/lib/selectors'
+import { head } from 'ramda'
+import { WALLET_IMMUTABLE_PATH, BLOCKCHAIN_DATA_PATH } from '../../config'
+
 
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
 class TransactionsPanel extends Component {
   constructor (props) {
     super(props)
-    // this should be a selector
-    const addr = this.props.wallet.get('wallet').get('hd_wallets').first()
-                 ? this.props.wallet.get('wallet').get('hd_wallets').first().get('accounts').first().get('xpub')
-                 : ""
+    const xpub = head(getXpubs(this.props[WALLET_IMMUTABLE_PATH]).toJS())
+    const addr = xpub ? xpub : ""
     this.state = { addr }
   }
 
   render () {
-    let { blockchainData, requestTxs, clearTxs } = this.props
+    let { requestTxs, clearTxs } = this.props
     let { addr } = this.state
-    let info = blockchainData.addressesInfo.get(addr)
-    let txs = info ? info.get('transactions').toJS() : []
+    let info = this.props[BLOCKCHAIN_DATA_PATH].get('addressesInfo').get(addr).toJS()
+    let txs = info ? info.transactions : []
     let load = () => requestTxs(addr)
     let clear = () => clearTxs(addr)
 

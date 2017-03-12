@@ -7,6 +7,9 @@ import * as WalletActions from 'dream-wallet/lib/actions'
 import Login from './panels/Login'
 import TransactionsPanel from './panels/TransactionsPanel'
 import Test from './panels/Test'
+import SendForm from './panels/SendForm'
+import { getWalletContext } from 'dream-wallet/lib/selectors'
+import { WALLET_IMMUTABLE_PATH } from '../config'
 
 const styles = {
   panel: {
@@ -16,7 +19,7 @@ const styles = {
     marginLeft: 32,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'scroll'
   },
   header: {
     display: 'flex',
@@ -28,7 +31,7 @@ const styles = {
   },
   controls: {
     flex: 1,
-    overflow: 'hidden',
+    overflow: 'scroll',
     marginTop: 16
   },
   panelButton: {
@@ -54,27 +57,46 @@ const PanelHeader = ({ active, panels, onChangePanel }) => (
 class ControlPanel extends Component {
   constructor (props) {
     super(props)
-    this.state = { panel: 'login' }
+    // this.state = { panel: 'login' }
   }
   render () {
-    let { panel } = this.state
+    let { panel } = this.props
     let combinedActions = {...WalletActions, ...actions }
     let connectPanel = connect((state) => state, combinedActions)
+    // form
+    const onSubmit = (values) => {console.log(values)}
+    let formProps = { onSubmit }
+    // let connectForm = connect(() => formProps)
+    let createWalletContext = state => ({ walletContext: getWalletContext(state[WALLET_IMMUTABLE_PATH]).toJS() })
+    let connectForm = connect((state) => createWalletContext(state), formProps)
 
     const panels = ({
       'login': connectPanel(Login),
       'txs': connectPanel(TransactionsPanel),
       'test': connectPanel(Test)
+      // 'send': connectForm(SendForm)
     })
 
     let SelectedPanel = panels[panel]
     return (
       <Paper style={styles.panel} zDepth={3}>
-        <PanelHeader active={panel} panels={panels} onChangePanel={(panel) => this.setState({ panel })} />
+        <PanelHeader active={panel} panels={panels} onChangePanel={(panel) => this.props.dispatch(actions.switchPanel(panel))} />
         <div style={styles.controls}>{SelectedPanel ? <SelectedPanel panel={panel} /> : null}</div>
       </Paper>
     )
   }
 }
 
-export default ControlPanel
+const mapStateToProps = state => ({
+  panel: state.panel
+})
+
+const mapDispatchToProps = dispatch => ({
+  dispatch
+})
+
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ControlPanel)
