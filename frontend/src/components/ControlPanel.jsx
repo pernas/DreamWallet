@@ -7,6 +7,7 @@ import * as WalletActions from 'dream-wallet/lib/actions'
 import Login from './panels/Login'
 import TransactionsPanel from './panels/TransactionsPanel'
 import Test from './panels/Test'
+import Info from './panels/Info'
 import SendForm from './panels/SendForm'
 import { getWalletContext } from 'dream-wallet/lib/selectors'
 import { WALLET_IMMUTABLE_PATH } from '../config'
@@ -73,7 +74,8 @@ class ControlPanel extends Component {
     const panels = ({
       'login': connectPanel(Login),
       'txs': connectPanel(TransactionsPanel),
-      'test': connectPanel(Test)
+      'test': connectPanel(Test),
+      'info': connectPanel(Info)
       // 'send': connectForm(SendForm)
     })
 
