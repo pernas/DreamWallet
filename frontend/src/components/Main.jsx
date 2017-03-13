@@ -25,8 +25,6 @@ const styles = {
 
 class Main extends Component {
   render () {
-    console.log(this.props)
-    console.log(this.props[WALLET_IMMUTABLE_PATH])
     return (
       <div style={styles.wrapper}>
         <Paper style={styles.json} zDepth={3}>

@@ -1,22 +1,8 @@
 import React, { Component } from 'react'
-import TextField from 'material-ui/TextField'
+import { TextField, AutoComplete }from 'material-ui'
 import RaisedButton from 'material-ui/RaisedButton'
 import { createWalletApi } from 'dream-wallet/lib/network'
-
-let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
-
-const walletInfo = [
-  {
-    guid: 'f9df366a-3fc3-4826-827f-fb3c1e8ce616',
-    // sharedKey: '00efae13-985b-4858-81ad-71bd8b5ac863',
-    password: '100 cent'
-  },
-  {
-    guid: '024753b6-360e-4783-9382-46420ca22b90',
-    sharedKey: '94205e6f-b383-4d77-90c8-b3b4ad37001f',
-    password: 'password123'
-  }
-]
+import { keys } from 'ramda'
 
 const styles = {
   input: {
@@ -24,26 +10,22 @@ const styles = {
   }
 }
 
+let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
+
 class Login extends Component {
   constructor (props) {
     super(props)
-    let { panel } = props
-    this.state = panel === 'login2' ? walletInfo[1] : walletInfo[0]
+    this.state = {guid: '', password: ''}
     this.api = createWalletApi()
   }
 
+  handleUpdateInput (t) { this.setState({ guid: t }) }
+  getSessions () { return keys(this.props.session) }
+
   render () {
     let { loginState, loginStart } = this.props
-    let { guid, sharedKey, password } = this.state
-
-    let login = () => {
-      if(sharedKey) {
-        loginStart({guid, sharedKey, password})
-      } else {
-        // if we pass sharedKey: undefined to the action, then serialization of actions in redux-dev tools is failing
-        loginStart({guid, password})
-      }
-    }
+    let { guid, password } = this.state
+    let login = () => loginStart({guid, password})
 
     return (
       <div>
@@ -54,21 +36,16 @@ class Login extends Component {
           <li>Error: {String(loginState.error)}</li>
         </ul>
         <div>
-          <TextField
+          <AutoComplete
             name='guid'
             style={styles.input}
-            value={guid}
-            onChange={link(this, 'guid')}
-            placeholder='guid'
-          />
-        </div>
-        <div>
-          <TextField
-            name='sharedKey'
-            style={styles.input}
-            value={sharedKey}
-            onChange={link(this, 'sharedKey')}
-            placeholder='shared key'
+            filter={AutoComplete.noFilter}
+            searchText={this.state.guid}
+            onUpdateInput={this.handleUpdateInput.bind(this)}
+            floatingLabelText="guid"
+            openOnFocus={true}
+            fullWidth={true}
+            dataSource={this.getSessions.bind(this)()}
           />
         </div>
         <div>
@@ -77,7 +54,7 @@ class Login extends Component {
             style={styles.input}
             value={password}
             onChange={link(this, 'password')}
-            placeholder='password'
+            floatingLabelText="password"
             type='password'
           />
         </div>
