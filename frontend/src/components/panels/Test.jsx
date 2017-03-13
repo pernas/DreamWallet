@@ -55,12 +55,12 @@ class Test extends Component {
     }
   }
 
-  // corrupted wallet example
-  // guid: 1c562564-6417-41eb-a1f7-19bb754fcbe3
-  // sk: d9008326-f4b3-4183-8d23-65869c07fda6
-  // pwd: m13rd4
-  // priv 2: Gydcze5Z3LxVDwwmtQmHJP1ijKfSCijbBE3mz8vRQtVM
-  // second password: adeu
+  newAddress (addr, pwd) {
+    const wallet = getWallet(this.props[WALLET_IMMUTABLE_PATH])
+    Immutable.WalletUtils.isValidSecondPwd(pwd, wallet)
+      ? this.props.addAddress(addr, pwd)
+      : this.props.secondPasswordError(pwd)
+  }
 
   activate (pwd) {
     Immutable.WalletUtils.encrypt(pwd, getWallet(this.props[WALLET_IMMUTABLE_PATH]))
@@ -88,7 +88,7 @@ class Test extends Component {
   }
 
   render () {
-    const { addAddress, clearWallet, addLabel, changeMainPassword } = this.props
+    const { clearWallet, addLabel, changeMainPassword } = this.props
     const { password, address, label, mainPassword } = this.state
     return (
       <div>
@@ -97,15 +97,13 @@ class Test extends Component {
 
         <h2>Test Actions</h2>
         <div style={styles.row}>
-          <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} />
-          <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => addAddress(random(), password)} />
-          <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => addAddress(randomWatchOnly(), password)} />
+          {/* <RaisedButton style={styles.rowButton} secondary label='Empty Wallet' onClick={clearWallet} /> */}
+          <RaisedButton style={styles.rowButton} primary label='New Address' onClick={() => this.newAddress(random(), password)} />
+          <RaisedButton style={styles.rowButton} primary label='New Watch-Only' onClick={() => this.newAddress(randomWatchOnly(), password)} />
         </div>
 
         <div style={styles.row}>
           <TextField name='password' style={styles.input} value={password} onChange={link(this, 'password')} placeholder='second password' />
-          <RaisedButton style={styles.rowButton} primary label='password on' onClick={this.activate.bind(this, password)} />
-          <RaisedButton style={styles.rowButton} secondary label='password off' onClick={this.deactivate.bind(this, password)} />
         </div>
         <div style={styles.row}>
           <TextField name='mainPassword' style={styles.input} value={mainPassword} onChange={link(this, 'mainPassword')} placeholder='wallet password' />

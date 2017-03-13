@@ -57,7 +57,7 @@ export const walletImmutable = (state = WALLET_INITIAL_STATE, action) => {
       return action.payload
     }
     case A.WALLET_CLEAR: {
-      return Wallet()
+      return WALLET_INITIAL_STATE
     }
     case A.ADDRESS_ADD: {
       const {address, secondPassword} = action.payload

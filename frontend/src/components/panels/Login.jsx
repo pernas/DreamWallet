@@ -10,6 +10,13 @@ const styles = {
   }
 }
 
+// corrupted wallet example
+// guid: 1c562564-6417-41eb-a1f7-19bb754fcbe3
+// sk: d9008326-f4b3-4183-8d23-65869c07fda6
+// pwd: m13rd4
+// priv 2: Gydcze5Z3LxVDwwmtQmHJP1ijKfSCijbBE3mz8vRQtVM
+// second password: adeu
+
 let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 
 class Login extends Component {
