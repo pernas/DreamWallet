@@ -19,6 +19,8 @@ const styles = {
 }
 
 const TransactionList = (props) => {
+  const transactions = props.transactions.toJS()
+  const info = props.info.toJS()
   const header =
     <TableHeader displaySelectAll={false}>
       <TableRow>
@@ -51,10 +53,10 @@ const TransactionList = (props) => {
     </TableRow>
   )
 
-  let body = <TableBody displayRowCheckbox={false}> { mapI(txRow, props.transactions) } </TableBody>
+  let body = <TableBody displayRowCheckbox={false}> { mapI(txRow, transactions) } </TableBody>
   let tableView = <Table allRowsSelected={false}>{header}{body}</Table>
-  let nTx = props.transactions.length
-  let totalTx = props.info.n_tx
+  let nTx = transactions.length
+  let totalTx = info.n_tx
 
   let iconMenuButton = (
     <IconButton touch>
@@ -66,12 +68,12 @@ const TransactionList = (props) => {
     <Toolbar>
       <ToolbarGroup firstChild>
         <ToolbarTitle text='Transactions' style={{ marginLeft: 32 }} />
-        <RaisedButton label={props.info.address} primary />
+        <RaisedButton label={info.address} primary />
         <IconMenu iconButtonElement={iconMenuButton} >
-          <MenuItem primaryText={'balance: ' + props.info.final_balance} />
-          <MenuItem primaryText={'transactions: ' + props.transactions.length + ' / ' + props.info.n_tx} />
-          <MenuItem primaryText={'sent: ' + props.info.total_sent} />
-          <MenuItem primaryText={'received: ' + props.info.total_received} />
+          <MenuItem primaryText={'balance: ' + info.final_balance} />
+          <MenuItem primaryText={'transactions: ' + transactions.length + ' / ' + info.n_tx} />
+          <MenuItem primaryText={'sent: ' + info.total_sent} />
+          <MenuItem primaryText={'received: ' + info.total_received} />
         </IconMenu>
       </ToolbarGroup>
       <ToolbarGroup>
@@ -96,10 +98,10 @@ const TransactionList = (props) => {
   )
 }
 
-TransactionList.propTypes = {
-  transactions: React.PropTypes.array.isRequired,
-  info: React.PropTypes.object.isRequired,
-  loadMoreTransactions: React.PropTypes.func.isRequired
-}
+// TransactionList.propTypes = {
+//   transactions: React.PropTypes.array.isRequired,
+//   info: React.PropTypes.object.isRequired,
+//   loadMoreTransactions: React.PropTypes.func.isRequired
+// }
 
 export default TransactionList

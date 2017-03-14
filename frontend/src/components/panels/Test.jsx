@@ -67,14 +67,14 @@ class Test extends Component {
       .map(this.props.secondPasswordOn)
       // this action maybe it is not accurate (this might happen
       // if an exception is launched inside encryption)
-      .orElse(this.props.inconsistentWalletStateError)
+      .orElse(e => this.props.inconsistentWalletStateError(e.message))
   }
   deactivate (pwd) {
     const wallet = getWallet(this.props[WALLET_IMMUTABLE_PATH])
     Immutable.WalletUtils.isValidSecondPwd(pwd, wallet)
       ? Immutable.WalletUtils.decrypt(pwd, wallet)
         .map(this.props.secondPasswordOff)
-        .orElse(this.props.inconsistentWalletStateError)
+        .orElse(e => this.props.inconsistentWalletStateError(e.message))
       : this.props.secondPasswordError(pwd)
   }
 

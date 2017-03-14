@@ -18,7 +18,12 @@ export const getWalletContext = w => List([getXpubs(w), getAddresses(w)]).fold()
 export const getWallet = payload => payload.get('walletImmutable')
 export const isDoubleEncrypted = wallet => wallet.get('double_encryption')
 
+// context is a single address/xpub for now
+export const getAddrInfo = dpath => context => state =>
+  state[dpath].get('addressesInfo').get(context)
+
+// context is a single address/xpub for now
 export const getTransactions = dpath => context => state => {
-  let info = state[dpath].get('addressesInfo').get(context)
+  const info = getAddrInfo(dpath)(context)(state)
   return info ? info.get('transactions') : List([])
 }

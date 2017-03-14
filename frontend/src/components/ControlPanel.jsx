@@ -9,8 +9,12 @@ import TransactionsPanel from './panels/TransactionsPanel'
 import Test from './panels/Test'
 import Info from './panels/Info'
 import SendForm from './panels/SendForm'
-import { getWalletContext } from 'dream-wallet/lib/selectors'
-import { WALLET_IMMUTABLE_PATH } from '../config'
+import { getXpubs, getAddrInfo, getTransactions, getWalletContext } from 'dream-wallet/lib/selectors'
+import { head, compose, map, identity } from 'ramda'
+import { WALLET_IMMUTABLE_PATH, BLOCKCHAIN_DATA_PATH } from '../config'
+import { createSelector } from 'reselect'
+import { createListSelector } from 'reselect-map'
+
 
 const styles = {
   panel: {
@@ -71,9 +75,34 @@ class ControlPanel extends Component {
     let createWalletContext = state => ({ walletContext: getWalletContext(state[WALLET_IMMUTABLE_PATH]).toJS() })
     let connectForm = connect((state) => createWalletContext(state), formProps)
 
+    const log = (x) => {console.log('this is a expensive computation'); return x;}
+    const transformTx = compose(log)
+
+    const transactionsSelector = (xpub) => createSelector(
+      [ getTransactions(BLOCKCHAIN_DATA_PATH)(xpub) ],
+      (data) => data.map(transformTx)
+    )
+
+    const transactionsSelectorMap = (xpub) => createListSelector(
+      (getTransactions(BLOCKCHAIN_DATA_PATH)(xpub)),
+      tx => transformTx(tx)
+    )
+
+    const mapStateToPropsTxs = (state) => {
+      const xpub = head(getXpubs(state[WALLET_IMMUTABLE_PATH]).toJS())
+      const txs = transactionsSelectorMap(xpub)(state)
+      const info = getAddrInfo(BLOCKCHAIN_DATA_PATH)(xpub)(state)
+      return ({
+        xpub: xpub,
+        txs: txs,
+        info: info
+      })
+    }
+    let connectTransactions = connect(mapStateToPropsTxs, combinedActions)
+
     const panels = ({
       'login': connectPanel(Login),
-      'txs': connectPanel(TransactionsPanel),
+      'txs': connectTransactions(TransactionsPanel),
       'test': connectPanel(Test),
       'info': connectPanel(Info)
       // 'send': connectForm(SendForm)

@@ -22,7 +22,7 @@ let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 class Login extends Component {
   constructor (props) {
     super(props)
-    this.state = {guid: '', password: '`1234567890-=qazwsx'}
+    this.state = {guid: '', password: ''}
     this.api = createWalletApi()
   }
 
