@@ -5,6 +5,8 @@ import { Wallet, WalletUtils } from '../immutable'
 import { encryptSecPass } from '../WalletCrypto'
 import { Map } from 'immutable-ext'
 import { combineReducers } from 'redux-immutable'
+import BIP39 from 'bip39'
+import Bitcoin from 'bitcoinjs-lib'
 
 
 const emptyWallet = {
@@ -69,11 +71,37 @@ export const walletImmutable = (state = WALLET_INITIAL_STATE, action) => {
       if(!view(myAddressLens, state)) { return state }
       return set(compose(myAddressLens, Lens.label), label ,state)
     }
-    case A.WALLET_NEW_SET: { // this is for wallet-signup
+    case A.WALLET_NEW_SET: { // wallet-signup
+      // TODO :: all the derivations must be abstracted
+      // data
       const {guid, sharedKey, mnemonic, password} = action.payload
+      const defaultName = 'My Bitcoin Wallet'
+      const entropy = BIP39.mnemonicToEntropy(mnemonic)
+      const seed = BIP39.mnemonicToSeed(mnemonic)
+      BIP39.entropyToMnemonic
+      // TODO :: consider NETWORK (testnet, mainnet)
+      const masterNode = Bitcoin.HDNode.fromSeedBuffer(seed)
+      const index = 0;
+      const accNode = masterNode.deriveHardened(44).deriveHardened(0).deriveHardened(index)
+      const xpriv = accNode.toBase58()
+      const xpub = accNode.neutered().toBase58()
+      const receiveNode = accNode.derive(0)
+      const changeNode = accNode.derive(1)
+      const receivexpub = receiveNode.neutered().toBase58()
+      const changexpub = changeNode.neutered().toBase58()
+
+
+      // setters
+      const accLens = compose(Lens.hdwallets, Lens.first, Lens.accounts, Lens.first)
+      const setReceive = set(compose(accLens, Lens.cache, Lens.receiveAccount), receivexpub)
+      const setChange = set(compose(accLens, Lens.cache, Lens.changeAccount), changexpub)
+      const setxpriv = set(compose(accLens, Lens.xpriv), xpriv)
+      const setxpub = set(compose(accLens, Lens.xpub), xpub)
+      const setName = set(compose(accLens, Lens.label), defaultName)
+      const setSeed = set(compose(Lens.hdwallets, Lens.first, Lens.seedHex), entropy)
       const setGuid = set(Lens.guid, guid)
       const setSharedKey = set(Lens.sharedKey, sharedKey)
-      const setAll = compose(setSharedKey, setGuid)
+      const setAll = compose(setReceive, setChange, setxpriv, setxpub, setName, setSeed, setSharedKey, setGuid)
       return setAll(WALLET_INITIAL_STATE)
     }
     default:
