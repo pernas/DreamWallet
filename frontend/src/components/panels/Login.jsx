@@ -22,7 +22,7 @@ let link = (that, p) => (event) => that.setState({ [p]: event.target.value })
 class Login extends Component {
   constructor (props) {
     super(props)
-    this.state = {guid: '', password: ''}
+    this.state = {guid: '', password: '', newPassword: '', email: ''}
     this.api = createWalletApi()
   }
 
@@ -30,9 +30,10 @@ class Login extends Component {
   getSessions () { return keys(this.props.session) }
 
   render () {
-    let { loginState, loginStart } = this.props
-    let { guid, password } = this.state
+    let { loginState, loginStart, newWallet } = this.props
+    let { guid, password, newPassword, email } = this.state
     let login = () => loginStart({guid, password})
+    let create = () => newWallet({password: newPassword, email})
 
     return (
       <div>
@@ -66,6 +67,28 @@ class Login extends Component {
           />
         </div>
         <RaisedButton onClick={login} primary label='go' />
+        <div>
+          <TextField
+            name='email'
+            style={styles.input}
+            value={email}
+            onChange={link(this, 'email')}
+            floatingLabelText="email"
+            type='email'
+          />
+        </div>
+        <div>
+          <TextField
+            name='password'
+            style={styles.input}
+            value={newPassword}
+            onChange={link(this, 'newPassword')}
+            floatingLabelText="newPassword"
+            type='password'
+          />
+        </div>
+        <RaisedButton onClick={create} primary label='create' />
+
       </div>
     )
   }

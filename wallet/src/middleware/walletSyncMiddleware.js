@@ -25,6 +25,20 @@ const walletSyncMiddleware = ({ wpath, api } = {}) => (store) => (next) => (acti
       (error) => store.dispatch(A.syncError(error))
     )
   }
+
+  if (action.type === A.WALLET_NEW_SET && prevWallet !== nextWallet) { // wallet signup
+    const { email } = action.payload
+    api.createWallet(email)(nextWallet).then(checksum => {
+      store.dispatch(A.syncStart())
+      store.dispatch(A.changePayloadChecksum(checksum))
+      return checksum
+    }).then(
+      (cs) => store.dispatch(A.syncSuccess(cs))
+    ).catch(
+      (error) => store.dispatch(A.syncError(error))
+    )
+  }
+
   return result
 }
 

@@ -69,6 +69,13 @@ export const walletImmutable = (state = WALLET_INITIAL_STATE, action) => {
       if(!view(myAddressLens, state)) { return state }
       return set(compose(myAddressLens, Lens.label), label ,state)
     }
+    case A.WALLET_NEW_SET: { // this is for wallet-signup
+      const {guid, sharedKey, mnemonic, password} = action.payload
+      const setGuid = set(Lens.guid, guid)
+      const setSharedKey = set(Lens.sharedKey, sharedKey)
+      const setAll = compose(setSharedKey, setGuid)
+      return setAll(WALLET_INITIAL_STATE)
+    }
     default:
       return state
   }
@@ -83,6 +90,9 @@ export const pbkdf2_iterations = (state = 5000, action) => {
     }
     case A.WALLET_LOAD: {
       return action.payload.get('pbkdf2_iterations')
+    }
+    case A.WALLET_NEW_SET: {
+      return 5000 // intiial-iterations for new wallets
     }
     default:
       return state
@@ -101,6 +111,10 @@ export const password = (state = '', action) => {
     case A.MAIN_PASSWORD_CHANGE: {
       return action.payload
     }
+    case A.WALLET_NEW_SET: {
+      const { password } = action.payload
+      return password
+    }
     default:
       return state
   }
@@ -114,6 +128,9 @@ export const version = (state = 3, action) => {
     }
     case A.WALLET_LOAD: {
       return action.payload.get('version')
+    }
+    case A.WALLET_NEW_SET: {
+      return 3
     }
     default:
       return state
@@ -132,6 +149,9 @@ export const payload_checksum = (state = '', action) => {
     case A.PAYLOAD_CHECKSUM_CHANGE: {
       return action.payload
     }
+    case A.WALLET_NEW_SET: {
+      return ''
+    }
     default:
       return state
   }
@@ -145,6 +165,10 @@ export const language = (state = 'en', action) => {
     }
     case A.WALLET_LOAD: {
       return action.payload.get('language')
+    }
+    case A.WALLET_NEW_SET: {
+      const { language } = action.payload
+      return language ? language : 'en'
     }
     default:
       return state
@@ -161,6 +185,9 @@ export const sync_pubkeys = (state = false, action) => {
     case A.WALLET_LOAD: {
       return action.payload.get('sync_pubkeys')
     }
+    case A.WALLET_NEW_SET: {
+      return false
+    }
     default:
       return state
   }
@@ -174,6 +201,9 @@ export const war_checksum = (state = '', action) => {
     }
     case A.WALLET_LOAD: {
       return action.payload.get('war_checksum')
+    }
+    case A.WALLET_NEW_SET: {
+      return ''
     }
     default:
       return state
@@ -189,6 +219,9 @@ export const auth_type = (state = 0, action) => {
     case A.WALLET_LOAD: {
       return action.payload.get('auth_type') || 0
     }
+    case A.WALLET_NEW_SET: {
+      return 0
+    }
     default:
       return state
   }
@@ -202,6 +235,9 @@ export const real_auth_type = (state = 0, action) => {
     }
     case A.WALLET_LOAD: {
       return action.payload.get('real_auth_type') || 0
+    }
+    case A.WALLET_NEW_SET: {
+      return 0
     }
     default:
       return state
