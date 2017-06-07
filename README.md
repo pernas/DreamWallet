@@ -1,4 +1,6 @@
-# DreamWallet
+# DreamWallet (deprecated)
+
+## This package is split into dream-wallet and dream-wallet-frontend
 
 ## Run
 
